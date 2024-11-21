@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="Clinica_Vet.Views.VeterinarioView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Clinica_Vet.Views"
+    xmlns:vm="using:Clinica_Vet.ViewModels"
+    xmlns:toolkit="using:CommunityToolkit.WinUI.UI.Controls">
+
+
+
+    <!-- Layout principal -->
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <!-- Header -->
+            <RowDefinition Height="*" />
+            <!-- Conteúdo Principal -->
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Background="#0078D7" Padding="16" CornerRadius="4">
+            <TextBlock Text="Gerenciamento de Veterinários" 
+                       Foreground="White" 
+                       FontSize="24" 
+                       FontWeight="Bold" />
+        </Border>
+
+        <!-- Conteúdo Principal -->
+        <Grid Grid.Row="1" Margin="16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*" />
+                <!-- Formulário -->
+                <ColumnDefinition Width="2*" />
+                <!-- Lista -->
+            </Grid.ColumnDefinitions>
+
+            <!-- Formulário -->
+            <StackPanel Grid.Column="0" Spacing="8">
+                <TextBlock Text="Adicionar / Editar Veterinário" FontSize="20" FontWeight="SemiBold" />
+                <TextBox PlaceholderText="Nome" Text="{Binding Nome, Mode=TwoWay}" />
+                <TextBox PlaceholderText="Endereço" Text="{Binding Endereco, Mode=TwoWay}" />
+                <TextBox PlaceholderText="CEP" Text="{Binding Cep, Mode=TwoWay}" />
+                <TextBox PlaceholderText="Telefone" Text="{Binding Telefone, Mode=TwoWay}" />
+                <TextBox PlaceholderText="E-mail" Text="{Binding Email, Mode=TwoWay}" />
+
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button Content="Adicionar" Command="{Binding AdicionarCommand}" />
+                    <Button Content="Editar" Command="{Binding EditarCommand}" />
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Lista -->
+            <toolkit:DataGrid Grid.Column="1" 
+                              ItemsSource="{Binding Veterinarios}" 
+                              AutoGenerateColumns="False" 
+                              SelectionMode="Single" 
+                              SelectedItem="{Binding VeterinarioSelecionado, Mode=TwoWay}">
+                <toolkit:DataGrid.Columns>
+                    <toolkit:DataGridTextColumn Header="ID" Binding="{Binding Id}" />
+                    <toolkit:DataGridTextColumn Header="Nome" Binding="{Binding Nome}" />
+                    <toolkit:DataGridTextColumn Header="Telefone" Binding="{Binding Telefone}" />
+                    <toolkit:DataGridTextColumn Header="E-mail" Binding="{Binding Email}" />
+                </toolkit:DataGrid.Columns>
+            </toolkit:DataGrid>
+
+            <Button Content="Remover" Grid.Column="1" 
+                    Command="{Binding RemoverCommand}" 
+                    VerticalAlignment="Bottom" Margin="0,8,0,0" />
+        </Grid>
+    </Grid>
+    </Page>

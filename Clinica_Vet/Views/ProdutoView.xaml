@@ -1,0 +1,95 @@
+<Page
+    x:Class="Clinica_Vet.Views.ProdutoView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:Clinica_Vet.ViewModels"
+    xmlns:toolkit="using:CommunityToolkit.WinUI.UI.Controls">
+
+
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Background="#0078D7" Padding="16" CornerRadius="4">
+            <TextBlock Text="Gerenciamento de Estoque" 
+                       Foreground="White" 
+                       FontSize="24" 
+                       FontWeight="Bold" />
+        </Border>
+
+        <!-- Conteúdo Principal -->
+        <Grid Grid.Row="1" Margin="16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="3*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Formulário Produto -->
+            <StackPanel Grid.Column="0" Spacing="8">
+                <TextBlock Text="Adicionar / Editar Produto" FontSize="20" FontWeight="SemiBold" />
+
+                <!-- Campo Nome -->
+                <TextBox PlaceholderText="Nome do Produto" Text="{Binding Nome, Mode=TwoWay}" />
+
+                <!-- Campo Data de Entrada -->
+                <Grid>
+                    <TextBlock Text="Data de Entrada"
+                               Foreground="Gray"
+                               VerticalAlignment="Center"
+                               Margin="4"
+                               IsHitTestVisible="False"
+                               Visibility="{Binding DataEntrada, Converter={StaticResource NullToVisibilityConverter}}" />
+                    <DatePicker SelectedDate="{Binding DataEntrada, Mode=TwoWay}" />
+                </Grid>
+
+                <!-- Campo Data de Validade -->
+                <Grid>
+                    <TextBlock Text="Data de Validade"
+                               Foreground="Gray"
+                               VerticalAlignment="Center"
+                               Margin="4"
+                               IsHitTestVisible="False"
+                               Visibility="{Binding DataValidade, Converter={StaticResource NullToVisibilityConverter}}" />
+                    <DatePicker SelectedDate="{Binding DataValidade, Mode=TwoWay}" />
+                </Grid>
+
+                <!-- Campo Data de Saída -->
+                <Grid>
+                    <TextBlock Text="Data de Saída"
+                               Foreground="Gray"
+                               VerticalAlignment="Center"
+                               Margin="4"
+                               IsHitTestVisible="False"
+                               Visibility="{Binding DataSaida, Converter={StaticResource NullToVisibilityConverter}}" />
+                    <DatePicker SelectedDate="{Binding DataSaida, Mode=TwoWay}" />
+                </Grid>
+
+                <!-- Botões -->
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button Content="Adicionar" Command="{Binding AdicionarProdutoCommand}" />
+                    <Button Content="Editar" Command="{Binding EditarProdutoCommand}" />
+                </StackPanel>
+                <Button Content="Remover" Command="{Binding RemoverProdutoCommand}" />
+            </StackPanel>
+
+            <!-- Lista Produtos -->
+            <toolkit:DataGrid Grid.Column="1" 
+                              ItemsSource="{Binding Produtos}" 
+                              AutoGenerateColumns="False" 
+                              SelectionMode="Single" 
+                              SelectedItem="{Binding ProdutoSelecionado, Mode=TwoWay}">
+                <toolkit:DataGrid.Columns>
+                    <toolkit:DataGridTextColumn Header="ID" Binding="{Binding Id}" />
+                    <toolkit:DataGridTextColumn Header="Nome" Binding="{Binding Nome}" />
+                    <toolkit:DataGridTextColumn Header="Data Entrada" Binding="{Binding DataEntrada}" />
+                    <toolkit:DataGridTextColumn Header="Data Validade" Binding="{Binding DataValidade}" />
+                    <toolkit:DataGridTextColumn Header="Data Saída" Binding="{Binding DataSaida}" />
+                </toolkit:DataGrid.Columns>
+            </toolkit:DataGrid>
+        </Grid>
+    </Grid>
+</Page>

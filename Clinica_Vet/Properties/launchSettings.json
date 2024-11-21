@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Clinica_Vet (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "Clinica_Vet (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

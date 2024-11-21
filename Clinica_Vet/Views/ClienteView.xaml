@@ -1,0 +1,85 @@
+<Page
+    x:Class="Clinica_Vet.Views.ClienteView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:toolkit="using:CommunityToolkit.WinUI.UI.Controls">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Background="#0078D7" Padding="16" CornerRadius="4">
+            <TextBlock Text="Gerenciamento de Clientes" 
+                       Foreground="White" 
+                       FontSize="24" 
+                       FontWeight="Bold" />
+        </Border>
+
+        <!-- Conteúdo Principal -->
+        <Grid Grid.Row="1" Margin="16">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- SearchBox -->
+            <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,16">
+                <TextBox PlaceholderText="Buscar Cliente"
+                         Text="{Binding SearchTerm, Mode=TwoWay}"
+                         Width="300"
+                         Margin="0,0,16,0" />
+                <Button Content="Adicionar Cliente" Click="OnAdicionarClienteClick" />
+            </StackPanel>
+
+            <!-- Lista de Clientes -->
+            <toolkit:DataGrid Grid.Row="1"
+                              ItemsSource="{Binding ClientesFiltrados}"
+                              AutoGenerateColumns="False"
+                              SelectionMode="Single"
+                              SelectedItem="{Binding ClienteSelecionado, Mode=TwoWay}">
+                <toolkit:DataGrid.Columns>
+                    <toolkit:DataGridTextColumn Header="ID" Binding="{Binding Id}" />
+                    <toolkit:DataGridTextColumn Header="Nome" Binding="{Binding Nome}" />
+                    <toolkit:DataGridTextColumn Header="Telefone" Binding="{Binding Telefone}" />
+                    <toolkit:DataGridTextColumn Header="Email" Binding="{Binding Email}" />
+                    <toolkit:DataGridTextColumn Header="Endereço" Binding="{Binding Endereco}" />
+                    <toolkit:DataGridTextColumn Header="CEP" Binding="{Binding Cep}" />
+                </toolkit:DataGrid.Columns>
+            </toolkit:DataGrid>
+
+            <!-- Botões de Ação -->
+            <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="0,16,0,0">
+                <Button Content="Editar" Command="{Binding EditarClienteCommand}" 
+                        IsEnabled="{Binding ClienteSelecionado, Converter={StaticResource NullToBooleanConverter}}" />
+                <Button Content="Deletar" Command="{Binding DeletarClienteCommand}" 
+                        IsEnabled="{Binding ClienteSelecionado, Converter={StaticResource NullToBooleanConverter}}" 
+                        Margin="8,0,0,0" />
+                <Button Content="Adicionar Animal" Command="{Binding AdicionarAnimalCommand}" 
+                        IsEnabled="{Binding ClienteSelecionado, Converter={StaticResource NullToBooleanConverter}}" 
+                        Margin="8,0,0,0" />
+            </StackPanel>
+        </Grid>
+
+        <!-- Floating Window (ContentDialog) -->
+        <ContentDialog
+            x:Name="AdicionarClienteDialog"
+            Title="Adicionar Cliente"
+            PrimaryButtonText="Salvar"
+            SecondaryButtonText="Cancelar"
+            PrimaryButtonClick="OnSalvarClienteClick"
+            CloseButtonClick="OnCancelarClienteClick">
+
+            <StackPanel Spacing="8">
+                <TextBox Header="Nome" x:Name="NomeTextBox" />
+                <TextBox Header="Telefone" x:Name="TelefoneTextBox" />
+                <TextBox Header="Email" x:Name="EmailTextBox" />
+                <TextBox Header="Endereço" x:Name="EnderecoTextBox" />
+                <TextBox Header="CEP" x:Name="CepTextBox" />
+            </StackPanel>
+        </ContentDialog>
+    </Grid>
+</Page>

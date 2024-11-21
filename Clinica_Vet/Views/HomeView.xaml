@@ -1,0 +1,58 @@
+<Page
+    x:Class="Clinica_Vet.Views.HomeView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:Clinica_Vet.ViewModels"
+    xmlns:toolkit="using:CommunityToolkit.WinUI.UI.Controls">
+
+
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Background="#0078D7" Padding="16" CornerRadius="4">
+            <TextBlock Text="Consultas do Dia" 
+                       Foreground="White" 
+                       FontSize="24" 
+                       FontWeight="Bold" />
+        </Border>
+
+        <!-- Conteúdo Principal -->
+        <Grid Grid.Row="1" Margin="16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="3*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- CalendarView -->
+            <CalendarView Grid.Column="0"
+                          SelectedDatesChanged="CalendarView_SelectedDatesChanged" />
+
+            <!-- Lista de Consultas -->
+            <StackPanel Grid.Column="1" Spacing="8">
+                <TextBlock Text="Consultas para o dia selecionado:" 
+                           FontSize="18" 
+                           FontWeight="SemiBold" />
+                <ItemsControl ItemsSource="{Binding ConsultasDoDia}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderThickness="1" BorderBrush="Gray" Margin="4" Padding="8">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Veterinario.Nome}" 
+                                               FontWeight="Bold" />
+                                    <TextBlock Text="{Binding Cliente.Nome}" />
+                                    <TextBlock Text="{Binding DataFormatada}" />
+                                    <TextBlock Text="{Binding Relatorio}" TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Page>
