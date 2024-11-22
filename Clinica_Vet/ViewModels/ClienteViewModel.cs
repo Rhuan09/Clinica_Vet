@@ -2,30 +2,34 @@
 using Clinica_Vet.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Runtime.ConstrainedExecution;
 using System.Threading.Tasks;
+using System.Linq;
+using System.Diagnostics;
+using System;
+using Clinica_Vet.Models;
 
 namespace Clinica_Vet.ViewModels
 {
     public partial class ClienteViewModel : ObservableObject
     {
         private readonly IDataAccess<Cliente> _clienteDao;
+        private readonly IDataAccess<Animal> _animalDao;
+        private readonly IDataAccess<Especie> _especieDao; // Para gerenciar espécies
 
         [ObservableProperty]
         private ObservableCollection<Cliente> clientes;
 
         [ObservableProperty]
-        private ObservableCollection<Cliente> clientesFiltrados;
-
-        [ObservableProperty]
         private Cliente clienteSelecionado;
 
         [ObservableProperty]
-        private string searchTerm;
+        private Animal animalSelecionado;
 
+        [ObservableProperty]
+        private ObservableCollection<Especie> especiesDisponiveis; // Lista de espécies disponíveis
+
+        // Propriedades para capturar dados do cliente
         [ObservableProperty]
         private string nome;
 
@@ -41,44 +45,30 @@ namespace Clinica_Vet.ViewModels
         [ObservableProperty]
         private string cep;
 
-        public ClienteViewModel(IDataAccess<Cliente> clienteDao)
+        public ClienteViewModel(IDataAccess<Cliente> clienteDao, IDataAccess<Animal> animalDao, IDataAccess<Especie> especieDao)
         {
             _clienteDao = clienteDao;
-            Clientes = new ObservableCollection<Cliente>();
-            ClientesFiltrados = new ObservableCollection<Cliente>();
+            _animalDao = animalDao;
+            _especieDao = especieDao;
+
             _ = CarregarClientesAsync();
+            _ = CarregarEspeciesAsync(); // Carregar espécies disponíveis
         }
 
         private async Task CarregarClientesAsync()
         {
             var todosClientes = await _clienteDao.ConsultarAsync();
             Clientes = new ObservableCollection<Cliente>(todosClientes);
-            FiltrarClientes();
         }
 
-        partial void OnSearchTermChanged(string value)
+        private async Task CarregarEspeciesAsync()
         {
-            FiltrarClientes();
-        }
-
-        private void FiltrarClientes()
-        {
-            if (string.IsNullOrEmpty(SearchTerm))
-            {
-                ClientesFiltrados = new ObservableCollection<Cliente>(Clientes);
-            }
-            else
-            {
-                var filtro = Clientes.Where(c =>
-                    c.Nome.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) ||
-                    c.Telefone.Contains(SearchTerm) ||
-                    c.Email.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase));
-                ClientesFiltrados = new ObservableCollection<Cliente>(filtro);
-            }
+            var especies = await _especieDao.ConsultarAsync();
+            EspeciesDisponiveis = new ObservableCollection<Especie>(especies);
         }
 
         [RelayCommand]
-        public void AdicionarCliente()
+        public async Task AdicionarClienteAsync()
         {
             var novoCliente = new Cliente
             {
@@ -89,42 +79,81 @@ namespace Clinica_Vet.ViewModels
                 Cep = Cep
             };
 
-            _clienteDao.RegistrarAsync(novoCliente);
+            // Salva no banco de dados
+            await _clienteDao.RegistrarAsync(novoCliente);
+
+            // Atualiza a lista de clientes
             Clientes.Add(novoCliente);
-            FiltrarClientes();
+
+            // Limpa os campos do formulário
+            Nome = Telefone = Email = Endereco = Cep = string.Empty;
         }
 
         [RelayCommand]
-        public void EditarCliente()
+        public async Task EditarClienteAsync()
         {
             if (ClienteSelecionado == null) return;
 
-            ClienteSelecionado.Nome = Nome;
-            ClienteSelecionado.Telefone = Telefone;
-            ClienteSelecionado.Email = Email;
-            ClienteSelecionado.Endereco = Endereco;
-            ClienteSelecionado.Cep = Cep;
+            // Atualiza o cliente no banco de dados
+            await _clienteDao.AtualizarAsync(ClienteSelecionado);
 
-            _clienteDao.AtualizarAsync(ClienteSelecionado);
-            FiltrarClientes();
+            // Atualiza os animais associados
+            foreach (var animal in ClienteSelecionado.Animais)
+            {
+                await _animalDao.AtualizarAsync(animal);
+            }
         }
 
         [RelayCommand]
-        public void RemoverCliente()
+        public async Task AdicionarAnimalAsync(Animal novoAnimal)
         {
             if (ClienteSelecionado == null) return;
 
-            _clienteDao.RemoverAsync(ClienteSelecionado);
+            // Adiciona ao banco de dados
+            await _animalDao.RegistrarAsync(novoAnimal);
+
+            // Atualiza a lista de animais do cliente
+            ClienteSelecionado.Animais.Add(novoAnimal);
+            OnPropertyChanged(nameof(ClienteSelecionado.Animais));
+        }
+
+
+
+        [RelayCommand]
+        public async Task RemoverAnimalAsync()
+        {
+            if (AnimalSelecionado == null || ClienteSelecionado == null) return;
+
+            try
+            {
+                await _animalDao.RemoverAsync(AnimalSelecionado); // Remove from database
+                ClienteSelecionado.Animais.Remove(AnimalSelecionado); // Remove from collection
+                OnPropertyChanged(nameof(ClienteSelecionado.Animais)); // Notify UI
+            }
+            catch (Exception ex)
+            {
+                // Handle error, log if needed
+                Debug.WriteLine($"Error removing animal: {ex.Message}");
+            }
+        }
+
+
+
+        [RelayCommand]
+        public async Task RemoverClienteAsync()
+        {
+            if (ClienteSelecionado == null)
+            {
+                // Adicione um log ou mensagem de erro, se necessário
+                return;
+            }
+
+            await _clienteDao.RemoverAsync(ClienteSelecionado);
             Clientes.Remove(ClienteSelecionado);
-            FiltrarClientes();
+
+            // Atualiza a interface
+            OnPropertyChanged(nameof(Clientes));
         }
 
-        [RelayCommand]
-        private void AdicionarAnimal()
-        {
-            if (ClienteSelecionado == null) return;
-
-            // Lógica para adicionar animal associado ao cliente selecionado
-        }
     }
 }

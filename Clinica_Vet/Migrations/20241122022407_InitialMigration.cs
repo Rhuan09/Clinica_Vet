@@ -5,12 +5,12 @@
 namespace Clinica_Vet.Migrations
 {
     /// <inheritdoc />
-    public partial class AddConsultaRelationships : Migration
+    public partial class InitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-     
+
         }
 
         /// <inheritdoc />

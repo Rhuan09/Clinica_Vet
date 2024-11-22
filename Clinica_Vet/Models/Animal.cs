@@ -1,26 +1,118 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 
 namespace Clinica_Vet.Models
 {
-    public class Animal
+    public class Animal : INotifyPropertyChanged
     {
-        public int Id { get; set; } // Chave primária
-        public string Nome { get; set; }
-        public int Idade { get; set; }
-        public int Sexo { get; set; }
-        public double Peso { get; set; }
+        private string _nome;
+        private int _idade;
+        private int _sexo;
+        private double _peso;
+        private int? _especieId;
+        private Especie _especie;
+        private ObservableCollection<Tratamento> _tratamentos;
 
-        public int ClienteId { get; set; } // Chave estrangeira para Cliente
+        public int Id { get; set; }
+        public int ClienteId { get; set; }
         public Cliente Cliente { get; set; }
 
-        public int? EspecieId { get; set; } // Chave estrangeira para Especie (opcional)
-        public Especie Especie { get; set; }
+        public string Nome
+        {
+            get => _nome;
+            set
+            {
+                if (_nome != value)
+                {
+                    _nome = value;
+                    OnPropertyChanged(nameof(Nome));
+                }
+            }
+        }
 
-        public List<Tratamento> Tratamentos { get; set; } = new(); // Relação 1:N com Tratamento
+        public int Idade
+        {
+            get => _idade;
+            set
+            {
+                if (_idade != value)
+                {
+                    _idade = value;
+                    OnPropertyChanged(nameof(Idade));
+                }
+            }
+        }
+
+        public int Sexo
+        {
+            get => _sexo;
+            set
+            {
+                if (_sexo != value)
+                {
+                    _sexo = value;
+                    OnPropertyChanged(nameof(Sexo));
+                }
+            }
+        }
+
+        public double Peso
+        {
+            get => _peso;
+            set
+            {
+                if (_peso != value)
+                {
+                    _peso = value;
+                    OnPropertyChanged(nameof(Peso));
+                }
+            }
+        }
+
+        public int? EspecieId
+        {
+            get => _especieId;
+            set
+            {
+                if (_especieId != value)
+                {
+                    _especieId = value;
+                    OnPropertyChanged(nameof(EspecieId));
+                }
+            }
+        }
+
+        public Especie Especie
+        {
+            get => _especie;
+            set
+            {
+                if (_especie != value)
+                {
+                    _especie = value;
+                    OnPropertyChanged(nameof(Especie));
+                }
+            }
+        }
+
+        public ObservableCollection<Tratamento> Tratamentos
+        {
+            get => _tratamentos ??= new ObservableCollection<Tratamento>();
+            set
+            {
+                if (_tratamentos != value)
+                {
+                    _tratamentos = value;
+                    OnPropertyChanged(nameof(Tratamentos));
+                }
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
-
 }

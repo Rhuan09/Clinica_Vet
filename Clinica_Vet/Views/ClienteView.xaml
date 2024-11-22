@@ -18,67 +18,97 @@
                        FontWeight="Bold" />
         </Border>
 
-        <!-- Conteúdo Principal -->
-        <Grid Grid.Row="1" Margin="16">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
-
-            <!-- SearchBox -->
-            <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,16">
-                <TextBox PlaceholderText="Buscar Cliente"
-                         Text="{Binding SearchTerm, Mode=TwoWay}"
-                         Width="300"
-                         Margin="0,0,16,0" />
-                <Button Content="Adicionar Cliente" Click="OnAdicionarClienteClick" />
-            </StackPanel>
-
-            <!-- Lista de Clientes -->
-            <toolkit:DataGrid Grid.Row="1"
-                              ItemsSource="{Binding ClientesFiltrados}"
+        <!-- Botão e Lista -->
+        <StackPanel Grid.Row="1" Margin="16">
+            <Button Content="Adicionar Cliente" Click="OnAdicionarClienteClick" Margin="0,0,0,16" />
+            <toolkit:DataGrid ItemsSource="{Binding Clientes}"
                               AutoGenerateColumns="False"
                               SelectionMode="Single"
-                              SelectedItem="{Binding ClienteSelecionado, Mode=TwoWay}">
+                              SelectedItem="{Binding ClienteSelecionado, Mode=TwoWay}"
+                              SelectionChanged="OnClienteSelecionadoChanged">
                 <toolkit:DataGrid.Columns>
                     <toolkit:DataGridTextColumn Header="ID" Binding="{Binding Id}" />
                     <toolkit:DataGridTextColumn Header="Nome" Binding="{Binding Nome}" />
                     <toolkit:DataGridTextColumn Header="Telefone" Binding="{Binding Telefone}" />
                     <toolkit:DataGridTextColumn Header="Email" Binding="{Binding Email}" />
-                    <toolkit:DataGridTextColumn Header="Endereço" Binding="{Binding Endereco}" />
-                    <toolkit:DataGridTextColumn Header="CEP" Binding="{Binding Cep}" />
                 </toolkit:DataGrid.Columns>
             </toolkit:DataGrid>
+        </StackPanel>
 
-            <!-- Botões de Ação -->
-            <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="0,16,0,0">
-                <Button Content="Editar" Command="{Binding EditarClienteCommand}" 
-                        IsEnabled="{Binding ClienteSelecionado, Converter={StaticResource NullToBooleanConverter}}" />
-                <Button Content="Deletar" Command="{Binding DeletarClienteCommand}" 
-                        IsEnabled="{Binding ClienteSelecionado, Converter={StaticResource NullToBooleanConverter}}" 
-                        Margin="8,0,0,0" />
-                <Button Content="Adicionar Animal" Command="{Binding AdicionarAnimalCommand}" 
-                        IsEnabled="{Binding ClienteSelecionado, Converter={StaticResource NullToBooleanConverter}}" 
-                        Margin="8,0,0,0" />
-            </StackPanel>
-        </Grid>
-
-        <!-- Floating Window (ContentDialog) -->
+        <!-- Floating Window -->
         <ContentDialog
-            x:Name="AdicionarClienteDialog"
-            Title="Adicionar Cliente"
+            x:Name="ClienteDialog"
+            Title="{Binding ClienteSelecionado.Nome}"
             PrimaryButtonText="Salvar"
             SecondaryButtonText="Cancelar"
+            MaxHeight="600"
             PrimaryButtonClick="OnSalvarClienteClick"
-            CloseButtonClick="OnCancelarClienteClick">
+            SecondaryButtonClick="OnCancelarClienteClick">
 
-            <StackPanel Spacing="8">
-                <TextBox Header="Nome" x:Name="NomeTextBox" />
-                <TextBox Header="Telefone" x:Name="TelefoneTextBox" />
-                <TextBox Header="Email" x:Name="EmailTextBox" />
-                <TextBox Header="Endereço" x:Name="EnderecoTextBox" />
-                <TextBox Header="CEP" x:Name="CepTextBox" />
+            <ScrollViewer>
+                <StackPanel Spacing="16">
+                    <!-- Informações do Cliente -->
+                    <TextBlock Text="Informações do Cliente" FontSize="18" FontWeight="Bold" />
+                    <TextBox Header="Nome" Text="{Binding ClienteSelecionado.Nome, Mode=TwoWay}" />
+                    <TextBox Header="Telefone" Text="{Binding ClienteSelecionado.Telefone, Mode=TwoWay}" />
+                    <TextBox Header="Email" Text="{Binding ClienteSelecionado.Email, Mode=TwoWay}" />
+                    <TextBox Header="Endereço" Text="{Binding ClienteSelecionado.Endereco, Mode=TwoWay}" />
+                    <TextBox Header="CEP" Text="{Binding ClienteSelecionado.Cep, Mode=TwoWay}" />
+
+                    <!-- Lista de Animais -->
+                    <TextBlock Text="Animais" FontSize="18" FontWeight="Bold" />
+                    <toolkit:DataGrid ItemsSource="{Binding ClienteSelecionado.Animais}"
+                                      AutoGenerateColumns="False"
+                                      SelectionMode="Single"
+                                      SelectedItem="{Binding AnimalSelecionado, Mode=TwoWay}"
+                                      MinHeight="200">
+                        <toolkit:DataGrid.Columns>
+                            <toolkit:DataGridTextColumn Header="Nome" Binding="{Binding Nome}" />
+                            <toolkit:DataGridTextColumn Header="Idade" Binding="{Binding Idade}" />
+                            <toolkit:DataGridTextColumn Header="Peso" Binding="{Binding Peso}" />
+                            <toolkit:DataGridTemplateColumn Header="Espécie">
+                                <toolkit:DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <ComboBox ItemsSource="{Binding DataContext.EspeciesDisponiveis, ElementName=ClienteDialog}"
+                                                  SelectedValue="{Binding EspecieId, Mode=TwoWay}"
+                                                  DisplayMemberPath="Nome"
+                                                  SelectedValuePath="Id"
+                                                  Width="150" />
+                                    </DataTemplate>
+                                </toolkit:DataGridTemplateColumn.CellTemplate>
+                            </toolkit:DataGridTemplateColumn>
+                        </toolkit:DataGrid.Columns>
+                    </toolkit:DataGrid>
+
+                    <!-- Botões de Ação -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="16" Margin="0,16,0,0">
+                        <Button Content="Adicionar Animal" Background="LightGreen" Click="OnAdicionarAnimalClick" />
+                        <Button Content="Excluir Animal" Background="LightBlue" Command="{Binding RemoverAnimalCommand}" />
+                        <Button Content="Excluir Cliente" Background="LightCoral" Command="{Binding RemoverClienteCommand}" />
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
+        </ContentDialog>
+
+        <!-- ContentDialog para Adicionar Animal -->
+        <ContentDialog
+            x:Name="AdicionarAnimalDialog"
+            Title="Adicionar Animal"
+            PrimaryButtonText="Salvar"
+            SecondaryButtonText="Cancelar"
+            PrimaryButtonClick="OnSalvarAnimalClick"
+            SecondaryButtonClick="OnCancelarAnimalClick"
+            MaxWidth="400">
+
+            <StackPanel Spacing="16">
+                <TextBox Header="Nome" x:Name="AnimalNomeTextBox" />
+                <TextBox Header="Idade" x:Name="AnimalIdadeTextBox" />
+                <TextBox Header="Peso" x:Name="AnimalPesoTextBox" />
+                <ComboBox Header="Espécie"
+                          x:Name="AnimalEspecieComboBox"
+                          ItemsSource="{Binding EspeciesDisponiveis}"
+                          DisplayMemberPath="Nome"
+                          SelectedValuePath="Id" />
             </StackPanel>
         </ContentDialog>
     </Grid>

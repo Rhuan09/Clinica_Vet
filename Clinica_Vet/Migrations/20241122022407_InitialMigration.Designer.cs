@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Clinica_Vet.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241121132445_AddConsultaRelationships")]
-    partial class AddConsultaRelationships
+    [Migration("20241122022407_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -168,13 +168,13 @@ namespace Clinica_Vet.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("DataEntrada")
+                    b.Property<DateTime?>("DataEntrada")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("DataSaida")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("DataValidade")
+                    b.Property<DateTime?>("DataValidade")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Nome")

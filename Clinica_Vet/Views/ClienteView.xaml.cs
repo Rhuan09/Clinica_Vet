@@ -1,69 +1,199 @@
+using Clinica_Vet.Models;
 using Clinica_Vet.ViewModels;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Threading.Tasks;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace Clinica_Vet.Views
 {
-    /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
-    /// </summary>
     public sealed partial class ClienteView : Page
     {
         public ClienteView()
         {
             this.InitializeComponent();
             DataContext = Ioc.Default.GetRequiredService<ClienteViewModel>();
+
+        }
+        private bool isDialogOpen = false;
+
+        /// <summary>
+        /// Abre o diálogo para exibir as informações do cliente selecionado.
+        /// </summary>
+        private async void OnClienteSelecionadoChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (DataContext is ClienteViewModel viewModel && viewModel.ClienteSelecionado != null)
+            {
+                // Preserva explicitamente o cliente selecionado
+                var clienteAtual = viewModel.ClienteSelecionado;
+
+                try
+                {
+                    await ClienteDialog.ShowAsync();
+                }
+                finally
+                {
+                    // Garante que o cliente selecionado seja restaurado após o diálogo
+                    viewModel.ClienteSelecionado = clienteAtual;
+                }
+            }
         }
 
-        private void OnAdicionarClienteClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+
+        private async void OnAdicionarAnimalClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            // Limpa os campos antes de abrir o diálogo
+            if (DataContext is ClienteViewModel viewModel && viewModel.ClienteSelecionado != null)
+            {
+                // Fecha o ClienteDialog para permitir a abertura de outro ContentDialog
+                ClienteDialog.Hide();
+
+                // Configura o ComboBox de espécies
+                AnimalEspecieComboBox.SelectedIndex = -1;
+
+                // Limpa os campos do diálogo
+                AnimalNomeTextBox.Text = string.Empty;
+                AnimalIdadeTextBox.Text = string.Empty;
+                AnimalPesoTextBox.Text = string.Empty;
+
+                // Abre o diálogo para adicionar animal
+                var result = await AdicionarAnimalDialog.ShowAsync();
+
+                // Reabre o ClienteDialog após fechar o AdicionarAnimalDialog
+                if (result == ContentDialogResult.Secondary || result == ContentDialogResult.Primary)
+                {
+                    await ClienteDialog.ShowAsync();
+                }
+            }
+            else
+            {
+                // Cliente não selecionado
+                var noClientDialog = new ContentDialog
+                {
+                    Title = "Erro",
+                    Content = "Por favor, selecione um cliente antes de adicionar um animal.",
+                    CloseButtonText = "Ok",
+                    XamlRoot = this.XamlRoot
+                };
+
+                await noClientDialog.ShowAsync();
+            }
+        }
+
+
+        private async void OnSalvarAnimalClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+        {
+            if (DataContext is ClienteViewModel viewModel)
+            {
+                // Fecha o diálogo antes de realizar a operação
+                AdicionarAnimalDialog.Hide();
+
+                string nome = AnimalNomeTextBox.Text;
+                int.TryParse(AnimalIdadeTextBox.Text, out int idade);
+                double.TryParse(AnimalPesoTextBox.Text, out double peso);
+                int? especieId = AnimalEspecieComboBox.SelectedValue as int?;
+
+                if (!string.IsNullOrEmpty(nome) && especieId.HasValue)
+                {
+                    // Adiciona o animal ao cliente selecionado
+                    await viewModel.AdicionarAnimalAsync(new Animal
+                    {
+                        Nome = nome,
+                        Idade = idade,
+                        Peso = peso,
+                        ClienteId = viewModel.ClienteSelecionado.Id,
+                        EspecieId = especieId.Value
+                    });
+                }
+                else
+                {
+                    // Exibe um erro se o formulário estiver incompleto
+                    var errorDialog = new ContentDialog
+                    {
+                        Title = "Erro",
+                        Content = "Preencha todos os campos antes de salvar.",
+                        CloseButtonText = "Ok",
+                        XamlRoot = this.XamlRoot
+                    };
+
+                    await errorDialog.ShowAsync();
+                }
+            }
+        }
+
+
+        private void OnCancelarAnimalClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+        {
+            AdicionarAnimalDialog.Hide();
+        }
+
+
+        /// <summary>
+        /// Lógica para adicionar um novo cliente.
+        /// </summary>
+        private async void OnAdicionarClienteClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        {
             if (DataContext is ViewModels.ClienteViewModel viewModel)
             {
-                viewModel.Nome = string.Empty;
-                viewModel.Telefone = string.Empty;
-                viewModel.Email = string.Empty;
-                viewModel.Endereco = string.Empty;
-                viewModel.Cep = string.Empty;
-            }
+                // Cria um diálogo para adicionar cliente
+                var dialog = new ContentDialog
+                {
+                    Title = "Adicionar Cliente",
+                    PrimaryButtonText = "Salvar",
+                    CloseButtonText = "Cancelar",
+                    DefaultButton = ContentDialogButton.Primary,
+                    Content = new StackPanel
+                    {
+                        Spacing = 8,
+                        Children =
+                        {
+                            new TextBox { Header = "Nome", Text = viewModel.Nome },
+                            new TextBox { Header = "Telefone", Text = viewModel.Telefone },
+                            new TextBox { Header = "Email", Text = viewModel.Email },
+                            new TextBox { Header = "Endereço", Text = viewModel.Endereco },
+                            new TextBox { Header = "CEP", Text = viewModel.Cep }
+                        }
+                    },
+                    XamlRoot = this.XamlRoot
+                };
 
-            // Abre o ContentDialog
-            AdicionarClienteDialog.ShowAsync();
+                var result = await dialog.ShowAsync();
+
+                if (result == ContentDialogResult.Primary)
+                {
+                    var stackPanel = (StackPanel)dialog.Content;
+
+                    // Preenche as propriedades do ViewModel com os dados do formulário
+                    viewModel.Nome = ((TextBox)stackPanel.Children[0]).Text;
+                    viewModel.Telefone = ((TextBox)stackPanel.Children[1]).Text;
+                    viewModel.Email = ((TextBox)stackPanel.Children[2]).Text;
+                    viewModel.Endereco = ((TextBox)stackPanel.Children[3]).Text;
+                    viewModel.Cep = ((TextBox)stackPanel.Children[4]).Text;
+
+                    // Chama o comando para adicionar cliente
+                    await viewModel.AdicionarClienteAsync();
+                }
+            }
         }
 
-        private void OnSalvarClienteClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+        /// <summary>
+        /// Salva as alterações feitas no cliente.
+        /// </summary>
+        private async void OnSalvarClienteClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
         {
             if (DataContext is ViewModels.ClienteViewModel viewModel)
             {
-                viewModel.AdicionarCliente();
+                await viewModel.EditarClienteAsync();
+                // Fecha o ContentDialog
+                ClienteDialog.Hide();
             }
-
-            // Fecha o diálogo
-            AdicionarClienteDialog.Hide();
         }
 
+        /// <summary>
+        /// Fecha o diálogo sem salvar.
+        /// </summary>
         private void OnCancelarClienteClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
         {
-            // Fecha o diálogo sem salvar
-            AdicionarClienteDialog.Hide();
+            ClienteDialog.Hide();
         }
-
     }
 }

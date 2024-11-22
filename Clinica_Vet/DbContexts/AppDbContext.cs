@@ -1,5 +1,7 @@
 ﻿using Clinica_Vet.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.UI.Xaml.Documents;
+using Windows.System;
 
 namespace Clinica_Vet.DbContexts
 {
@@ -16,7 +18,9 @@ namespace Clinica_Vet.DbContexts
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlite("Data Source=veterinario.db");
+            string databasePath = @"C:\Users\rhuan\source\repos\Clinica_Vet\Clinica_Vet\veterinario.db";
+            optionsBuilder.UseSqlite($"Data Source={databasePath}");
+       
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
