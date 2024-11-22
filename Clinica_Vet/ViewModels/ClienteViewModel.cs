@@ -56,10 +56,19 @@ namespace Clinica_Vet.ViewModels
         }
 
         private async Task CarregarClientesAsync()
-        {
-            var todosClientes = await _clienteDao.ConsultarAsync();
-            Clientes = new ObservableCollection<Cliente>(todosClientes);
-        }
+{
+    var todosClientes = await _clienteDao.ConsultarAsync();
+
+    foreach (var cliente in todosClientes)
+    {
+        // Carrega os animais relacionados para cada cliente
+        cliente.Animais = new ObservableCollection<Animal>(
+            await _animalDao.ConsultarAsync(a => a.ClienteId == cliente.Id));
+    }
+
+    Clientes = new ObservableCollection<Cliente>(todosClientes);
+}
+
 
         private async Task CarregarEspeciesAsync()
         {
@@ -107,13 +116,18 @@ namespace Clinica_Vet.ViewModels
         [RelayCommand]
         public async Task AdicionarAnimalAsync(Animal novoAnimal)
         {
-            if (ClienteSelecionado == null) return;
+            if (ClienteSelecionado == null)
+                return;
 
-            // Adiciona ao banco de dados
+            // Salva o animal no banco de dados
+            novoAnimal.ClienteId = ClienteSelecionado.Id;
             await _animalDao.RegistrarAsync(novoAnimal);
 
-            // Atualiza a lista de animais do cliente
+            // Atualiza a lista de animais no cliente selecionado
+            ClienteSelecionado.Animais ??= new ObservableCollection<Animal>();
             ClienteSelecionado.Animais.Add(novoAnimal);
+
+            // Atualiza a interface
             OnPropertyChanged(nameof(ClienteSelecionado.Animais));
         }
 

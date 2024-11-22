@@ -1,7 +1,10 @@
 ﻿using Clinica_Vet.DbContexts;
 using Clinica_Vet.Models;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Clinica_Vet.DataAccess
@@ -36,6 +39,11 @@ namespace Clinica_Vet.DataAccess
         public async Task<List<Especie>> ConsultarAsync()
         {
             return await _context.Especies.ToListAsync(); // Retorna todas as espécies do banco
+        }
+
+        public async Task<List<Especie>> ConsultarAsync(Expression<Func<Especie, bool>> filtro)
+        {
+            return await _context.Especies.Where(filtro).ToListAsync();
         }
     }
 }

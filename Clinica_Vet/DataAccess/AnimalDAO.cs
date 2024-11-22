@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using Clinica_Vet.DbContexts;
@@ -41,6 +42,21 @@ namespace Clinica_Vet.DataAccess
         {
             return await _context.Animais.ToListAsync();
         }
+
+        public async Task<List<Animal>> ConsultarAsync(Expression<Func<Animal, bool>> filtro = null)
+        {
+            // Busca todos os animais do banco de dados
+            var animais = _context.Animais.AsQueryable();
+
+            // Aplica o filtro, se fornecido
+            if (filtro != null)
+            {
+                animais = animais.Where(filtro).AsQueryable();
+            }
+
+            return await animais.ToListAsync();
+        }
+
     }
 
 }
