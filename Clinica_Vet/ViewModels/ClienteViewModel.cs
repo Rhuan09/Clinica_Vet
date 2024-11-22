@@ -56,18 +56,19 @@ namespace Clinica_Vet.ViewModels
         }
 
         private async Task CarregarClientesAsync()
-{
-    var todosClientes = await _clienteDao.ConsultarAsync();
+        {
+            var todosClientes = await _clienteDao.ConsultarAsync();
 
-    foreach (var cliente in todosClientes)
-    {
-        // Carrega os animais relacionados para cada cliente
-        cliente.Animais = new ObservableCollection<Animal>(
-            await _animalDao.ConsultarAsync(a => a.ClienteId == cliente.Id));
-    }
+            foreach (var cliente in todosClientes)
+            {
+                // Carrega os animais relacionados somente do banco de dados
+                cliente.Animais = new ObservableCollection<Animal>(
+                    await _animalDao.ConsultarAsync(a => a.ClienteId == cliente.Id));
+            }
 
-    Clientes = new ObservableCollection<Cliente>(todosClientes);
-}
+            Clientes = new ObservableCollection<Cliente>(todosClientes);
+        }
+
 
 
         private async Task CarregarEspeciesAsync()
@@ -116,20 +117,28 @@ namespace Clinica_Vet.ViewModels
         [RelayCommand]
         public async Task AdicionarAnimalAsync(Animal novoAnimal)
         {
-            if (ClienteSelecionado == null)
-                return;
+            if (ClienteSelecionado == null || novoAnimal == null) return;
 
-            // Salva o animal no banco de dados
-            novoAnimal.ClienteId = ClienteSelecionado.Id;
-            await _animalDao.RegistrarAsync(novoAnimal);
+            try
+            {
+                // Salva o animal no banco de dados
+                novoAnimal.ClienteId = ClienteSelecionado.Id;
+                await _animalDao.RegistrarAsync(novoAnimal);
 
-            // Atualiza a lista de animais no cliente selecionado
-            ClienteSelecionado.Animais ??= new ObservableCollection<Animal>();
-            ClienteSelecionado.Animais.Add(novoAnimal);
+                // Opcional: Atualize a lista local apenas do banco
+                ClienteSelecionado.Animais = new ObservableCollection<Animal>(
+                    await _animalDao.ConsultarAsync(a => a.ClienteId == ClienteSelecionado.Id));
 
-            // Atualiza a interface
-            OnPropertyChanged(nameof(ClienteSelecionado.Animais));
+                // Notifica a interface para atualização
+                OnPropertyChanged(nameof(ClienteSelecionado.Animais));
+            }
+            catch (Exception ex)
+            {
+                // Log de erro
+                System.Diagnostics.Debug.WriteLine($"Erro ao adicionar animal: {ex.Message}");
+            }
         }
+
 
 
 
@@ -140,16 +149,29 @@ namespace Clinica_Vet.ViewModels
 
             try
             {
-                await _animalDao.RemoverAsync(AnimalSelecionado); // Remove from database
-                ClienteSelecionado.Animais.Remove(AnimalSelecionado); // Remove from collection
-                OnPropertyChanged(nameof(ClienteSelecionado.Animais)); // Notify UI
+                // Store the animal to be removed
+                var animalToRemove = AnimalSelecionado;
+
+                // Remove from the database
+                await _animalDao.RemoverAsync(animalToRemove);
+
+                // Remove from the local collection
+                ClienteSelecionado.Animais.Remove(animalToRemove);
+
+                // Clear the selected animal to prevent re-execution
+                AnimalSelecionado = null;
+
+                // Notify the UI
+                OnPropertyChanged(nameof(ClienteSelecionado.Animais));
             }
             catch (Exception ex)
             {
-                // Handle error, log if needed
-                Debug.WriteLine($"Error removing animal: {ex.Message}");
+                // Log error
+                System.Diagnostics.Debug.WriteLine($"Erro ao remover animal: {ex.Message}");
             }
         }
+
+
 
 
 
@@ -157,17 +179,31 @@ namespace Clinica_Vet.ViewModels
         public async Task RemoverClienteAsync()
         {
             if (ClienteSelecionado == null)
-            {
-                // Adicione um log ou mensagem de erro, se necessário
                 return;
+
+            // Remove todos os animais associados ao cliente
+            if (ClienteSelecionado.Animais != null)
+            {
+                foreach (var animal in ClienteSelecionado.Animais.ToList())
+                {
+                    await _animalDao.RemoverAsync(animal);
+                }
             }
 
+            // Remove o cliente
             await _clienteDao.RemoverAsync(ClienteSelecionado);
             Clientes.Remove(ClienteSelecionado);
+
+            // Limpa a seleção
+            ClienteSelecionado = null;
 
             // Atualiza a interface
             OnPropertyChanged(nameof(Clientes));
         }
+
+
+
+
 
     }
 }

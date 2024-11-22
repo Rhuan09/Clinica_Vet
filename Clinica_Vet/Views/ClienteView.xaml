@@ -20,8 +20,12 @@
 
         <!-- Botão e Lista -->
         <StackPanel Grid.Row="1" Margin="16">
+            <TextBox PlaceholderText="Pesquisar Cliente"
+             Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+             Margin="0,0,0,16" />
             <Button Content="Adicionar Cliente" Click="OnAdicionarClienteClick" Margin="0,0,0,16" />
-            <toolkit:DataGrid ItemsSource="{Binding Clientes}"
+            <toolkit:DataGrid x:Name="ClientesDataGrid"
+                ItemsSource="{Binding Clientes}"
                               AutoGenerateColumns="False"
                               SelectionMode="Single"
                               SelectedItem="{Binding ClienteSelecionado, Mode=TwoWay}"
@@ -31,6 +35,8 @@
                     <toolkit:DataGridTextColumn Header="Nome" Binding="{Binding Nome}" />
                     <toolkit:DataGridTextColumn Header="Telefone" Binding="{Binding Telefone}" />
                     <toolkit:DataGridTextColumn Header="Email" Binding="{Binding Email}" />
+                    <toolkit:DataGridTextColumn Header="Endereço" Binding="{Binding Endereco}" />
+                    <toolkit:DataGridTextColumn Header="CEP" Binding="{Binding Cep}" />
                 </toolkit:DataGrid.Columns>
             </toolkit:DataGrid>
         </StackPanel>
@@ -66,25 +72,15 @@
                             <toolkit:DataGridTextColumn Header="Nome" Binding="{Binding Nome}" />
                             <toolkit:DataGridTextColumn Header="Idade" Binding="{Binding Idade}" />
                             <toolkit:DataGridTextColumn Header="Peso" Binding="{Binding Peso}" />
-                            <toolkit:DataGridTemplateColumn Header="Espécie">
-                                <toolkit:DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <ComboBox ItemsSource="{Binding DataContext.EspeciesDisponiveis, ElementName=ClienteDialog}"
-                                                  SelectedValue="{Binding EspecieId, Mode=TwoWay}"
-                                                  DisplayMemberPath="Nome"
-                                                  SelectedValuePath="Id"
-                                                  Width="150" />
-                                    </DataTemplate>
-                                </toolkit:DataGridTemplateColumn.CellTemplate>
-                            </toolkit:DataGridTemplateColumn>
+                            <toolkit:DataGridTextColumn Header="Espécie" Binding="{Binding Especie.Nome}" />
                         </toolkit:DataGrid.Columns>
                     </toolkit:DataGrid>
 
                     <!-- Botões de Ação -->
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="16" Margin="0,16,0,0">
                         <Button Content="Adicionar Animal" Background="LightGreen" Click="OnAdicionarAnimalClick" />
-                        <Button Content="Excluir Animal" Background="LightBlue" Command="{Binding RemoverAnimalCommand}" />
-                        <Button Content="Excluir Cliente" Background="LightCoral" Command="{Binding RemoverClienteCommand}" />
+                        <Button Content="Excluir Animal" Background="LightBlue" Command="{Binding RemoverAnimalCommand}" IsEnabled="{Binding AnimalSelecionado, Converter={StaticResource NullToBooleanConverter}}"/>
+                        <Button Content="Excluir Cliente" Background="LightCoral" Click="OnExcluirClienteClick" />
                     </StackPanel>
                 </StackPanel>
             </ScrollViewer>

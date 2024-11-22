@@ -20,22 +20,40 @@ namespace Clinica_Vet.Views
         /// <summary>
         /// Abre o diálogo para exibir as informações do cliente selecionado.
         /// </summary>
-        private async void OnClienteSelecionadoChanged(object sender, SelectionChangedEventArgs e)
+
+        private async void OnClienteSelecionadoChanged(object sender, Microsoft.UI.Xaml.Controls.SelectionChangedEventArgs e)
         {
             if (DataContext is ClienteViewModel viewModel && viewModel.ClienteSelecionado != null)
             {
-                // Preserva explicitamente o cliente selecionado
-                var clienteAtual = viewModel.ClienteSelecionado;
+                // Verifica se outro diálogo já está aberto
+                if (isDialogOpen)
+                    return;
 
+                isDialogOpen = true; // Marca o diálogo como aberto
                 try
                 {
-                    await ClienteDialog.ShowAsync();
+                    await ClienteDialog.ShowAsync(); // Exibe o diálogo
+                }
+                catch (Exception ex)
+                {
+                    // Opcional: Registrar erros
+                    System.Diagnostics.Debug.WriteLine($"Erro ao abrir o diálogo: {ex.Message}");
                 }
                 finally
                 {
-                    // Garante que o cliente selecionado seja restaurado após o diálogo
-                    viewModel.ClienteSelecionado = clienteAtual;
+                    isDialogOpen = false; // Libera o controle do diálogo
                 }
+            }
+        }
+
+        private async void OnExcluirClienteClick(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is ClienteViewModel viewModel)
+            {
+                await viewModel.RemoverClienteAsync();
+
+                // Fecha o diálogo após excluir o cliente
+                ClienteDialog.Hide();
             }
         }
 
@@ -62,6 +80,7 @@ namespace Clinica_Vet.Views
                 if (result == ContentDialogResult.Secondary || result == ContentDialogResult.Primary)
                 {
                     await ClienteDialog.ShowAsync();
+
                 }
             }
             else
@@ -184,7 +203,7 @@ namespace Clinica_Vet.Views
             {
                 await viewModel.EditarClienteAsync();
                 // Fecha o ContentDialog
-                ClienteDialog.Hide();
+                
             }
         }
 
@@ -194,6 +213,7 @@ namespace Clinica_Vet.Views
         private void OnCancelarClienteClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
         {
             ClienteDialog.Hide();
+            ClientesDataGrid.SelectedItem = null;
         }
     }
 }

@@ -14,9 +14,10 @@
 
             <!-- Global Converters -->
             <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
-            <converters:NullToVisibilityConverter x:Key="NullToBooleanConverter"/>
+            <converters:NullToBooleanConverter x:Key="NullToBooleanConverter" />
 
             <!-- Other app resources here -->
         </ResourceDictionary>
     </Application.Resources>
 </Application>
+
