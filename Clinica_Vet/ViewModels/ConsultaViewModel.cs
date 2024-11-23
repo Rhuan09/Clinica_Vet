@@ -80,11 +80,10 @@ namespace Clinica_Vet.ViewModels
                 return;
             }
 
-            // Consulta os animais do cliente selecionado
+            // Carregar animais do cliente selecionado
             var animais = await _animalDao.ConsultarAsync(a => a.ClienteId == ClienteSelecionado.Id);
 
             AnimaisDisponiveis = new ObservableCollection<Animal>(animais);
-            OnPropertyChanged(nameof(AnimaisDisponiveis));
         }
 
         public async Task SalvarConsultaAsync()

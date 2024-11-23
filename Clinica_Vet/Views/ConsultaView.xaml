@@ -32,7 +32,21 @@
                 <toolkit:DataGrid.Columns>
                     <toolkit:DataGridTextColumn Header="Data" Binding="{Binding Data}" />
                     <toolkit:DataGridTextColumn Header="Cliente" Binding="{Binding Cliente.Nome}" />
-                    <toolkit:DataGridTextColumn Header="Animal" Binding="{Binding Animal.Nome}" />
+                    <toolkit:DataGridTemplateColumn Header="Animal">
+                        <toolkit:DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Animal.Nome}" />
+                            </DataTemplate>
+                        </toolkit:DataGridTemplateColumn.CellTemplate>
+                        <toolkit:DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <ComboBox ItemsSource="{Binding DataContext.AnimaisDisponiveis, ElementName=ConsultasDataGrid}"
+                                          DisplayMemberPath="Nome"
+                                          SelectedValuePath="Id"
+                                          SelectedValue="{Binding AnimalId, Mode=TwoWay}" />
+                            </DataTemplate>
+                        </toolkit:DataGridTemplateColumn.CellEditingTemplate>
+                    </toolkit:DataGridTemplateColumn>
                     <toolkit:DataGridTextColumn Header="Veterinário" Binding="{Binding Veterinario.Nome}" />
                     <toolkit:DataGridTextColumn Header="Descrição" Binding="{Binding Descricao}" />
                 </toolkit:DataGrid.Columns>
@@ -55,13 +69,13 @@
                     <ComboBox Header="Cliente"
                               ItemsSource="{Binding Clientes}"
                               DisplayMemberPath="Nome"
-                              SelectedItem="{Binding ClienteSelecionado, Mode=TwoWay}" />
-                    <ComboBox x:Name="AnimalComboBox"
+                              SelectedItem="{Binding ClienteSelecionado, Mode=TwoWay}"
+                              SelectionChanged="OnClienteSelecionadoChanged" />
+                    <ComboBox Header="Animal"
                               ItemsSource="{Binding AnimaisDisponiveis}"
                               DisplayMemberPath="Nome"
                               SelectedValuePath="Id"
-                              SelectedValue="{Binding ConsultaSelecionada.AnimalId, Mode=TwoWay}"
-                              SelectionChanged="OnClienteSelecionadoChanged" />
+                              SelectedValue="{Binding ConsultaSelecionada.AnimalId, Mode=TwoWay}" />
                     <ComboBox Header="Veterinário"
                               ItemsSource="{Binding Veterinarios}"
                               DisplayMemberPath="Nome"
