@@ -17,6 +17,8 @@ namespace Clinica_Vet.Views
         }
         private bool isDialogOpen = false;
 
+
+
         /// <summary>
         /// Abre o diálogo para exibir as informações do cliente selecionado.
         /// </summary>
@@ -99,6 +101,7 @@ namespace Clinica_Vet.Views
         }
 
 
+
         private async void OnSalvarAnimalClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
         {
             if (DataContext is ClienteViewModel viewModel)
@@ -122,7 +125,9 @@ namespace Clinica_Vet.Views
                         ClienteId = viewModel.ClienteSelecionado.Id,
                         EspecieId = especieId.Value
                     });
+
                 }
+
                 else
                 {
                     // Exibe um erro se o formulário estiver incompleto
@@ -143,6 +148,7 @@ namespace Clinica_Vet.Views
         private void OnCancelarAnimalClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
         {
             AdicionarAnimalDialog.Hide();
+            ClientesDataGrid.SelectedItem = null;
         }
 
 
@@ -203,7 +209,8 @@ namespace Clinica_Vet.Views
             {
                 await viewModel.EditarClienteAsync();
                 // Fecha o ContentDialog
-                
+                ClientesDataGrid.SelectedItem = null;
+
             }
         }
 

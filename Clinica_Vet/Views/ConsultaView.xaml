@@ -2,10 +2,7 @@
     x:Class="Clinica_Vet.Views.ConsultaView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:vm="using:Clinica_Vet.ViewModels"
     xmlns:toolkit="using:CommunityToolkit.WinUI.UI.Controls">
-
-    
 
     <Grid>
         <Grid.RowDefinitions>
@@ -15,55 +12,68 @@
 
         <!-- Header -->
         <Border Background="#0078D7" Padding="16" CornerRadius="4">
-            <TextBlock Text="Gerenciamento de Consultas" 
-                       Foreground="White" 
-                       FontSize="24" 
+            <TextBlock Text="Gerenciamento de Consultas"
+                       Foreground="White"
+                       FontSize="24"
                        FontWeight="Bold" />
         </Border>
 
-        <!-- Conteúdo Principal -->
-        <Grid Grid.Row="1" Margin="16">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="2*" />
-                <!-- Formulário Consulta -->
-                <ColumnDefinition Width="3*" />
-                <!-- Lista Consultas -->
-            </Grid.ColumnDefinitions>
-
-            <!-- Formulário Consulta -->
-            <StackPanel Grid.Column="0" Spacing="8">
-                <TextBlock Text="Agendar / Editar Consulta" FontSize="20" FontWeight="SemiBold" />
-                <DatePicker SelectedDate="{Binding DataHoraConsulta, Mode=TwoWay}" />
-                <TextBox PlaceholderText="Relatório" Text="{Binding Relatorio, Mode=TwoWay}" />
-                <ComboBox ItemsSource="{Binding Veterinarios}" 
-                          SelectedItem="{Binding VeterinarioSelecionado, Mode=TwoWay}" 
-                          DisplayMemberPath="Nome"
-                          PlaceholderText="Selecione o Veterinário" />
-                <ComboBox ItemsSource="{Binding Clientes}" 
-                          SelectedItem="{Binding ClienteSelecionado, Mode=TwoWay}" 
-                          DisplayMemberPath="Nome"
-                          PlaceholderText="Selecione o Cliente" />
-
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <Button Content="Adicionar" Command="{Binding AdicionarConsultaCommand}" />
-                    <Button Content="Editar" Command="{Binding EditarConsultaCommand}" />
-                </StackPanel>
-                <Button Content="Remover" Command="{Binding RemoverConsultaCommand}" />
-            </StackPanel>
-
-            <!-- Lista Consultas -->
-            <toolkit:DataGrid Grid.Column="1" 
-                              ItemsSource="{Binding Consultas}" 
-                              AutoGenerateColumns="False" 
-                              SelectionMode="Single" 
-                              SelectedItem="{Binding ConsultaSelecionada, Mode=TwoWay}">
+        <!-- Botão e Lista -->
+        <StackPanel Grid.Row="1" Margin="16">
+            <Button Content="Adicionar Consulta"
+                    Click="OnAdicionarConsultaClick"
+                    Margin="0,0,0,16" />
+            <toolkit:DataGrid x:Name="ConsultasDataGrid"
+                              ItemsSource="{Binding Consultas}"
+                              AutoGenerateColumns="False"
+                              SelectionMode="Single"
+                              SelectedItem="{Binding ConsultaSelecionada, Mode=TwoWay}"
+                              SelectionChanged="OnConsultaSelecionadaChanged">
                 <toolkit:DataGrid.Columns>
                     <toolkit:DataGridTextColumn Header="Data" Binding="{Binding Data}" />
-                    <toolkit:DataGridTextColumn Header="Veterinário" Binding="{Binding Veterinario.Nome}" />
                     <toolkit:DataGridTextColumn Header="Cliente" Binding="{Binding Cliente.Nome}" />
-                    <toolkit:DataGridTextColumn Header="Relatório" Binding="{Binding Relatorio}" />
+                    <toolkit:DataGridTextColumn Header="Animal" Binding="{Binding Animal.Nome}" />
+                    <toolkit:DataGridTextColumn Header="Veterinário" Binding="{Binding Veterinario.Nome}" />
+                    <toolkit:DataGridTextColumn Header="Descrição" Binding="{Binding Descricao}" />
                 </toolkit:DataGrid.Columns>
             </toolkit:DataGrid>
-        </Grid>
+        </StackPanel>
+
+        <!-- Floating Window -->
+        <ContentDialog
+            x:Name="ConsultaDialog"
+            Title="{Binding ConsultaSelecionada.Descricao}"
+            PrimaryButtonText="Salvar"
+            SecondaryButtonText="Cancelar"
+            PrimaryButtonClick="OnSalvarConsultaClick"
+            SecondaryButtonClick="OnCancelarConsultaClick"
+            MaxHeight="600">
+
+            <ScrollViewer>
+                <StackPanel Spacing="16">
+                    <!-- Informações da Consulta -->
+                    <ComboBox Header="Cliente"
+                              ItemsSource="{Binding Clientes}"
+                              DisplayMemberPath="Nome"
+                              SelectedItem="{Binding ClienteSelecionado, Mode=TwoWay}" />
+                    <ComboBox x:Name="AnimalComboBox"
+                              ItemsSource="{Binding AnimaisDisponiveis}"
+                              DisplayMemberPath="Nome"
+                              SelectedValuePath="Id"
+                              SelectedValue="{Binding ConsultaSelecionada.AnimalId, Mode=TwoWay}"
+                              SelectionChanged="OnClienteSelecionadoChanged" />
+                    <ComboBox Header="Veterinário"
+                              ItemsSource="{Binding Veterinarios}"
+                              DisplayMemberPath="Nome"
+                              SelectedItem="{Binding VeterinarioSelecionado, Mode=TwoWay}" />
+                    <TextBox Header="Descrição"
+                             Text="{Binding ConsultaSelecionada.Descricao, Mode=TwoWay}" />
+                    <DatePicker Header="Data"
+                                Date="{Binding ConsultaSelecionada.Data, Mode=TwoWay}" />
+                    <TimePicker Header="Hora"
+                                Time="{Binding HoraSelecionada, Mode=TwoWay}" />
+                </StackPanel>
+            </ScrollViewer>
+        </ContentDialog>
     </Grid>
 </Page>

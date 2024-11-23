@@ -21,10 +21,18 @@ namespace Clinica_Vet.ViewModels
         private ObservableCollection<Cliente> clientes;
 
         [ObservableProperty]
+        private ObservableCollection<Cliente> clientesFiltrados;
+
+
+        [ObservableProperty]
         private Cliente clienteSelecionado;
 
         [ObservableProperty]
         private Animal animalSelecionado;
+
+        [ObservableProperty]
+        private string searchQuery;
+
 
         [ObservableProperty]
         private ObservableCollection<Especie> especiesDisponiveis; // Lista de espécies disponíveis
@@ -53,6 +61,29 @@ namespace Clinica_Vet.ViewModels
 
             _ = CarregarClientesAsync();
             _ = CarregarEspeciesAsync(); // Carregar espécies disponíveis
+        }
+
+        private void FiltrarClientes()
+        {
+            if (string.IsNullOrWhiteSpace(SearchQuery))
+            {
+                // Mostra todos os clientes se não houver texto na busca
+                ClientesFiltrados = new ObservableCollection<Cliente>(Clientes);
+            }
+            else
+            {
+                // Filtra os clientes com base no nome
+                var clientesFiltrados = Clientes
+                    .Where(c => c.Nome.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+
+                ClientesFiltrados = new ObservableCollection<Cliente>(clientesFiltrados);
+            }
+        }
+
+        partial void OnSearchQueryChanged(string value)
+        {
+            FiltrarClientes();
         }
 
         private async Task CarregarClientesAsync()

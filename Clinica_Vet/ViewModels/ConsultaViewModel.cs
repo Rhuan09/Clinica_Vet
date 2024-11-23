@@ -3,7 +3,6 @@ using Clinica_Vet.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,147 +12,93 @@ namespace Clinica_Vet.ViewModels
     public partial class ConsultaViewModel : ObservableObject
     {
         private readonly IDataAccess<Consulta> _consultaDao;
-        private readonly IDataAccess<Veterinario> _veterinarioDao;
         private readonly IDataAccess<Cliente> _clienteDao;
+        private readonly IDataAccess<Veterinario> _veterinarioDao;
+        private readonly IDataAccess<Animal> _animalDao;
 
         [ObservableProperty]
-        private ObservableCollection<Consulta> consultas;
+        private ObservableCollection<Animal> animaisDisponiveis;
 
-        [ObservableProperty]
-        private ObservableCollection<Veterinario> veterinarios;
-
-        [ObservableProperty]
-        private ObservableCollection<Cliente> clientes;
+        public ObservableCollection<Consulta> Consultas { get; private set; }
+        public ObservableCollection<Cliente> Clientes { get; private set; }
+        public ObservableCollection<Veterinario> Veterinarios { get; private set; }
+        public ObservableCollection<Animal> Animais { get; private set; }
 
         [ObservableProperty]
         private Consulta consultaSelecionada;
 
         [ObservableProperty]
-        private DateTime dataHoraConsulta;
-
-        [ObservableProperty]
-        private string relatorio;
+        private Cliente clienteSelecionado;
 
         [ObservableProperty]
         private Veterinario veterinarioSelecionado;
 
         [ObservableProperty]
-        private Cliente clienteSelecionado;
+        private Animal animalSelecionado;
 
-        public ConsultaViewModel(IDataAccess<Consulta> consultaDao, IDataAccess<Veterinario> veterinarioDao, IDataAccess<Cliente> clienteDao)
+        [ObservableProperty]
+        private TimeSpan horaSelecionada;
+
+        public ConsultaViewModel(
+            IDataAccess<Consulta> consultaDao,
+            IDataAccess<Cliente> clienteDao,
+            IDataAccess<Veterinario> veterinarioDao,
+            IDataAccess<Animal> animalDao)
         {
             _consultaDao = consultaDao;
-            _veterinarioDao = veterinarioDao;
             _clienteDao = clienteDao;
+            _veterinarioDao = veterinarioDao;
+            _animalDao = animalDao;
 
             Consultas = new ObservableCollection<Consulta>();
-            Veterinarios = new ObservableCollection<Veterinario>();
             Clientes = new ObservableCollection<Cliente>();
-
-            CarregarDadosAsync();
+            Veterinarios = new ObservableCollection<Veterinario>();
+            Animais = new ObservableCollection<Animal>();
         }
 
-        //public ConsultaViewModel()
-        //{
-        //    Consultas = new ObservableCollection<Consulta>();
-        //    Veterinarios = new ObservableCollection<Veterinario>();
-        //    Clientes = new ObservableCollection<Cliente>();
-        //}
-
-        [RelayCommand]
-        public async Task AdicionarConsultaAsync()
+        public async Task CarregarDadosAsync()
         {
-            // Validação de conflitos
-            if (ExisteConflitoDeHorario(DataHoraConsulta, VeterinarioSelecionado.Id, ClienteSelecionado.Id))
-            {
-                throw new InvalidOperationException("Já existe uma consulta marcada neste horário para o mesmo veterinário ou cliente.");
-            }
+            Consultas = new ObservableCollection<Consulta>(await _consultaDao.ConsultarAsync());
+            Clientes = new ObservableCollection<Cliente>(await _clienteDao.ConsultarAsync());
+            Veterinarios = new ObservableCollection<Veterinario>(await _veterinarioDao.ConsultarAsync());
+        }
 
-            // Criar a nova consulta
-            var novaConsulta = new Consulta
+        public void CriarNovaConsulta()
+        {
+            ConsultaSelecionada = new Consulta
             {
-                Data = DataHoraConsulta,
-                Relatorio = Relatorio,
-                VeterinarioId = VeterinarioSelecionado.Id,
-                ClienteId = ClienteSelecionado.Id
+                Data = DateTime.Now,
+                Descricao = "Nova Consulta"
             };
-
-            await _consultaDao.RegistrarAsync(novaConsulta);
-            await CarregarConsultasAsync();
-            LimparCampos();
         }
 
-        [RelayCommand]
-        public async Task EditarConsultaAsync()
+        public async Task CarregarAnimaisDoClienteAsync()
         {
-            if (ConsultaSelecionada == null) return;
-
-            // Validação de conflitos
-            if (ExisteConflitoDeHorario(DataHoraConsulta, VeterinarioSelecionado.Id, ClienteSelecionado.Id, ConsultaSelecionada.Id))
+            if (ClienteSelecionado == null)
             {
-                throw new InvalidOperationException("Já existe uma consulta marcada neste horário para o mesmo veterinário ou cliente.");
+                AnimaisDisponiveis = new ObservableCollection<Animal>();
+                return;
             }
 
-            ConsultaSelecionada.Data = DataHoraConsulta;
-            ConsultaSelecionada.Relatorio = Relatorio;
-            ConsultaSelecionada.VeterinarioId = VeterinarioSelecionado.Id;
-            ConsultaSelecionada.ClienteId = ClienteSelecionado.Id;
+            // Consulta os animais do cliente selecionado
+            var animais = await _animalDao.ConsultarAsync(a => a.ClienteId == ClienteSelecionado.Id);
 
-            await _consultaDao.AtualizarAsync(ConsultaSelecionada);
-            await CarregarConsultasAsync();
-            LimparCampos();
+            AnimaisDisponiveis = new ObservableCollection<Animal>(animais);
+            OnPropertyChanged(nameof(AnimaisDisponiveis));
         }
 
-        [RelayCommand]
-        public async Task RemoverConsultaAsync()
+        public async Task SalvarConsultaAsync()
         {
-            if (ConsultaSelecionada == null) return;
+            if (ConsultaSelecionada.Id == 0)
+            {
+                await _consultaDao.RegistrarAsync(ConsultaSelecionada);
+            }
+            else
+            {
+                await _consultaDao.AtualizarAsync(ConsultaSelecionada);
+            }
 
-            await _consultaDao.RemoverAsync(ConsultaSelecionada);
-            await CarregarConsultasAsync();
-            LimparCampos();
-        }
-
-        private async Task CarregarDadosAsync()
-        {
-            await CarregarConsultasAsync();
-            await CarregarVeterinariosAsync();
-            await CarregarClientesAsync();
-        }
-
-        private async Task CarregarConsultasAsync()
-        {
-            var lista = await _consultaDao.ConsultarAsync() ?? new List<Consulta>();
-            Consultas = new ObservableCollection<Consulta>(lista);
-        }
-
-        private async Task CarregarVeterinariosAsync()
-        {
-            var lista = await _veterinarioDao.ConsultarAsync() ?? new List<Veterinario>();
-            Veterinarios = new ObservableCollection<Veterinario>(lista);
-        }
-
-        private async Task CarregarClientesAsync()
-        {
-            var lista = await _clienteDao.ConsultarAsync() ?? new List<Cliente>();
-            Clientes = new ObservableCollection<Cliente>(lista);
-        }
-
-        private bool ExisteConflitoDeHorario(DateTime dataHora, int veterinarioId, int clienteId, int? consultaId = null)
-        {
-            return Consultas.Any(c =>
-                c.Data == dataHora &&
-                (c.VeterinarioId == veterinarioId || c.ClienteId == clienteId) &&
-                c.Id != consultaId);
-        }
-
-        private void LimparCampos()
-        {
-            DataHoraConsulta = DateTime.Now;
-            Relatorio = string.Empty;
-            VeterinarioSelecionado = null;
-            ClienteSelecionado = null;
-            ConsultaSelecionada = null;
+            await CarregarDadosAsync();
         }
     }
 }
