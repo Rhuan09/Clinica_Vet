@@ -170,35 +170,62 @@ namespace Clinica_Vet.Views
                     {
                         Spacing = 8,
                         Children =
-                        {
-                            new TextBox { Header = "Nome", Text = viewModel.Nome },
-                            new TextBox { Header = "Telefone", Text = viewModel.Telefone },
-                            new TextBox { Header = "Email", Text = viewModel.Email },
-                            new TextBox { Header = "Endereço", Text = viewModel.Endereco },
-                            new TextBox { Header = "CEP", Text = viewModel.Cep }
-                        }
+                {
+                    new TextBox { Header = "Nome", Text = viewModel.Nome },
+                    new TextBox { Header = "Telefone", Text = viewModel.Telefone },
+                    new TextBox { Header = "Email", Text = viewModel.Email },
+                    new TextBox { Header = "Endereço", Text = viewModel.Endereco },
+                    new TextBox { Header = "CEP", Text = viewModel.Cep }
+                }
                     },
                     XamlRoot = this.XamlRoot
                 };
 
                 var result = await dialog.ShowAsync();
+                var stackPanel = (StackPanel)dialog.Content;
 
                 if (result == ContentDialogResult.Primary)
                 {
-                    var stackPanel = (StackPanel)dialog.Content;
+                    // Verifica se todos os campos estão preenchidos
+                    if (!string.IsNullOrWhiteSpace(((TextBox)stackPanel.Children[0]).Text) &&
+                        !string.IsNullOrWhiteSpace(((TextBox)stackPanel.Children[1]).Text) &&
+                        !string.IsNullOrWhiteSpace(((TextBox)stackPanel.Children[2]).Text) &&
+                        !string.IsNullOrWhiteSpace(((TextBox)stackPanel.Children[3]).Text) &&
+                        !string.IsNullOrWhiteSpace(((TextBox)stackPanel.Children[4]).Text))
+                    {
+                        // Preenche as propriedades do ViewModel com os dados do formulário
+                        viewModel.Nome = ((TextBox)stackPanel.Children[0]).Text;
+                        viewModel.Telefone = ((TextBox)stackPanel.Children[1]).Text;
+                        viewModel.Email = ((TextBox)stackPanel.Children[2]).Text;
+                        viewModel.Endereco = ((TextBox)stackPanel.Children[3]).Text;
+                        viewModel.Cep = ((TextBox)stackPanel.Children[4]).Text;
 
-                    // Preenche as propriedades do ViewModel com os dados do formulário
-                    viewModel.Nome = ((TextBox)stackPanel.Children[0]).Text;
-                    viewModel.Telefone = ((TextBox)stackPanel.Children[1]).Text;
-                    viewModel.Email = ((TextBox)stackPanel.Children[2]).Text;
-                    viewModel.Endereco = ((TextBox)stackPanel.Children[3]).Text;
-                    viewModel.Cep = ((TextBox)stackPanel.Children[4]).Text;
+                        // Chama o comando para adicionar cliente
+                        await viewModel.AdicionarClienteAsync();
+                    }
+                    else
+                    {
+                        // Fecha o diálogo principal antes de exibir o erro
+                        dialog.Hide();
 
-                    // Chama o comando para adicionar cliente
-                    await viewModel.AdicionarClienteAsync();
+                        // Exibe um erro se o formulário estiver incompleto
+                        var errorDialog = new ContentDialog
+                        {
+                            Title = "Erro",
+                            Content = "Preencha todos os campos antes de salvar.",
+                            CloseButtonText = "Ok",
+                            XamlRoot = this.XamlRoot
+                        };
+
+                        await errorDialog.ShowAsync();
+                    }
                 }
             }
         }
+
+
+
+
 
         /// <summary>
         /// Salva as alterações feitas no cliente.

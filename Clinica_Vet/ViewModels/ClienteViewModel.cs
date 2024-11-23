@@ -53,6 +53,16 @@ namespace Clinica_Vet.ViewModels
         [ObservableProperty]
         private string cep;
 
+        [ObservableProperty]
+        private bool isSalvarHabilitado;
+
+        partial void OnNomeChanged(string value) => VerificarCamposObrigatorios();
+        partial void OnTelefoneChanged(string value) => VerificarCamposObrigatorios();
+        partial void OnEmailChanged(string value) => VerificarCamposObrigatorios();
+        partial void OnEnderecoChanged(string value) => VerificarCamposObrigatorios();
+        partial void OnCepChanged(string value) => VerificarCamposObrigatorios();
+
+
         public ClienteViewModel(IDataAccess<Cliente> clienteDao, IDataAccess<Animal> animalDao, IDataAccess<Especie> especieDao)
         {
             _clienteDao = clienteDao;
@@ -61,6 +71,16 @@ namespace Clinica_Vet.ViewModels
 
             _ = CarregarClientesAsync();
             _ = CarregarEspeciesAsync(); // Carregar espécies disponíveis
+        }
+
+        private void VerificarCamposObrigatorios()
+        {
+            // Valida se todos os campos obrigatórios estão preenchidos
+            IsSalvarHabilitado = !string.IsNullOrWhiteSpace(Nome) &&
+                                 !string.IsNullOrWhiteSpace(Telefone) &&
+                                 !string.IsNullOrWhiteSpace(Email) &&
+                                 !string.IsNullOrWhiteSpace(Endereco) &&
+                                 !string.IsNullOrWhiteSpace(Cep);
         }
 
         private void FiltrarClientes()

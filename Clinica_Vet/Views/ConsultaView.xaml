@@ -49,6 +49,7 @@
                     </toolkit:DataGridTemplateColumn>
                     <toolkit:DataGridTextColumn Header="Veterinário" Binding="{Binding Veterinario.Nome}" />
                     <toolkit:DataGridTextColumn Header="Descrição" Binding="{Binding Descricao}" />
+                    <toolkit:DataGridTextColumn Header="Relatório" Binding="{Binding Relatorio}" />
                 </toolkit:DataGrid.Columns>
             </toolkit:DataGrid>
         </StackPanel>
@@ -69,7 +70,8 @@
                     <ComboBox Header="Cliente"
                               ItemsSource="{Binding Clientes}"
                               DisplayMemberPath="Nome"
-                              SelectedItem="{Binding ClienteSelecionado, Mode=TwoWay}"
+                              SelectedValuePath="Id"
+                              SelectedValue="{Binding ConsultaSelecionada.ClienteId, Mode=TwoWay}"
                               SelectionChanged="OnClienteSelecionadoChanged" />
                     <ComboBox Header="Animal"
                               ItemsSource="{Binding AnimaisDisponiveis}"
@@ -79,7 +81,8 @@
                     <ComboBox Header="Veterinário"
                               ItemsSource="{Binding Veterinarios}"
                               DisplayMemberPath="Nome"
-                              SelectedItem="{Binding VeterinarioSelecionado, Mode=TwoWay}" />
+                              SelectedValuePath="Id"
+                              SelectedValue="{Binding ConsultaSelecionada.VeterinarioId, Mode=TwoWay}" />
                     <TextBox Header="Descrição"
                              Text="{Binding ConsultaSelecionada.Descricao, Mode=TwoWay}" />
                     <DatePicker Header="Data"

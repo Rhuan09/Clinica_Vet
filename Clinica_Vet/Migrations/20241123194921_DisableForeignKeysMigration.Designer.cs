@@ -3,6 +3,7 @@ using System;
 using Clinica_Vet.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Clinica_Vet.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241123194921_DisableForeignKeysMigration")]
+    partial class DisableForeignKeysMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.0");
@@ -48,7 +51,7 @@ namespace Clinica_Vet.Migrations
 
                     b.HasIndex("EspecieId");
 
-                    b.ToTable("Animais", (string)null);
+                    b.ToTable("Animais");
                 });
 
             modelBuilder.Entity("Clinica_Vet.Models.Cliente", b =>
@@ -79,7 +82,7 @@ namespace Clinica_Vet.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Clientes", (string)null);
+                    b.ToTable("Clientes");
                 });
 
             modelBuilder.Entity("Clinica_Vet.Models.Consulta", b =>
@@ -125,7 +128,7 @@ namespace Clinica_Vet.Migrations
 
                     b.HasIndex("VeterinarioId1");
 
-                    b.ToTable("Consultas", (string)null);
+                    b.ToTable("Consultas");
                 });
 
             modelBuilder.Entity("Clinica_Vet.Models.Especie", b =>
@@ -140,7 +143,7 @@ namespace Clinica_Vet.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Especies", (string)null);
+                    b.ToTable("Especies");
                 });
 
             modelBuilder.Entity("Clinica_Vet.Models.Exame", b =>
@@ -163,7 +166,7 @@ namespace Clinica_Vet.Migrations
 
                     b.HasIndex("ConsultaId");
 
-                    b.ToTable("Exames", (string)null);
+                    b.ToTable("Exames");
                 });
 
             modelBuilder.Entity("Clinica_Vet.Models.Produto", b =>
@@ -187,7 +190,7 @@ namespace Clinica_Vet.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Produtos", (string)null);
+                    b.ToTable("Produtos");
                 });
 
             modelBuilder.Entity("Clinica_Vet.Models.Tratamento", b =>
@@ -218,7 +221,7 @@ namespace Clinica_Vet.Migrations
 
                     b.HasIndex("AnimalId1");
 
-                    b.ToTable("Tratamentos", (string)null);
+                    b.ToTable("Tratamentos");
                 });
 
             modelBuilder.Entity("Clinica_Vet.Models.Veterinario", b =>
@@ -249,7 +252,7 @@ namespace Clinica_Vet.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Veterinarios", (string)null);
+                    b.ToTable("Veterinarios");
                 });
 
             modelBuilder.Entity("Clinica_Vet.Models.Animal", b =>
@@ -312,7 +315,8 @@ namespace Clinica_Vet.Migrations
                     b.HasOne("Clinica_Vet.Models.Consulta", "Consulta")
                         .WithMany("Exames")
                         .HasForeignKey("ConsultaId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Consulta");
                 });
@@ -321,7 +325,9 @@ namespace Clinica_Vet.Migrations
                 {
                     b.HasOne("Clinica_Vet.Models.Animal", "Animal")
                         .WithMany()
-                        .HasForeignKey("AnimalId");
+                        .HasForeignKey("AnimalId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Clinica_Vet.Models.Animal", null)
                         .WithMany("Tratamentos")

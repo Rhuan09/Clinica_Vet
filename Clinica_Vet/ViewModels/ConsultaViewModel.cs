@@ -22,19 +22,9 @@ namespace Clinica_Vet.ViewModels
         public ObservableCollection<Consulta> Consultas { get; private set; }
         public ObservableCollection<Cliente> Clientes { get; private set; }
         public ObservableCollection<Veterinario> Veterinarios { get; private set; }
-        public ObservableCollection<Animal> Animais { get; private set; }
 
         [ObservableProperty]
         private Consulta consultaSelecionada;
-
-        [ObservableProperty]
-        private Cliente clienteSelecionado;
-
-        [ObservableProperty]
-        private Veterinario veterinarioSelecionado;
-
-        [ObservableProperty]
-        private Animal animalSelecionado;
 
         [ObservableProperty]
         private TimeSpan horaSelecionada;
@@ -53,7 +43,6 @@ namespace Clinica_Vet.ViewModels
             Consultas = new ObservableCollection<Consulta>();
             Clientes = new ObservableCollection<Cliente>();
             Veterinarios = new ObservableCollection<Veterinario>();
-            Animais = new ObservableCollection<Animal>();
         }
 
         public async Task CarregarDadosAsync()
@@ -74,20 +63,43 @@ namespace Clinica_Vet.ViewModels
 
         public async Task CarregarAnimaisDoClienteAsync()
         {
-            if (ClienteSelecionado == null)
+            if (ConsultaSelecionada?.ClienteId == 0)
             {
                 AnimaisDisponiveis = new ObservableCollection<Animal>();
                 return;
             }
 
-            // Carregar animais do cliente selecionado
-            var animais = await _animalDao.ConsultarAsync(a => a.ClienteId == ClienteSelecionado.Id);
+            var animais = await _animalDao.ConsultarAsync(a => a.ClienteId == ConsultaSelecionada.ClienteId);
 
             AnimaisDisponiveis = new ObservableCollection<Animal>(animais);
         }
 
         public async Task SalvarConsultaAsync()
         {
+            if (ConsultaSelecionada == null)
+                return;
+
+            // Combina a data e hora
+            if (HoraSelecionada != null)
+            {
+                ConsultaSelecionada.Data = ConsultaSelecionada.Data.Date + HoraSelecionada;
+            }
+
+            // Verifica se os IDs estão setados
+            if (ConsultaSelecionada.ClienteId == 0 ||
+                ConsultaSelecionada.VeterinarioId == 0 ||
+                ConsultaSelecionada.AnimalId == 0) 
+            {
+                // Exiba uma mensagem de erro ou lance uma exceção
+                
+                throw new InvalidOperationException("Cliente, Veterinário  Animal são obrigatórios.");
+            }
+
+            if (string.IsNullOrEmpty(ConsultaSelecionada.Relatorio))
+            {
+                ConsultaSelecionada.Relatorio = "Relatório padrão";
+            }
+
             if (ConsultaSelecionada.Id == 0)
             {
                 await _consultaDao.RegistrarAsync(ConsultaSelecionada);

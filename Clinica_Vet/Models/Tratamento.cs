@@ -15,7 +15,9 @@ namespace Clinica_Vet.Models
         public int AnimalId { get; set; } // Chave estrangeira para Animal
         public Animal Animal { get; set; }
 
-        public List<Consulta> Consultas { get; set; } = new(); // Relação 1:N com Consulta
+        public ICollection<Consulta> Consultas { get; set; } = new List<Consulta>(); // Relação 1:N com Consulta
+
+        public string Descricao { get; set; } // Detalhes do tratamento
     }
 
 }

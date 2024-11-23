@@ -48,10 +48,41 @@ namespace Clinica_Vet.Views
         {
             if (DataContext is ConsultaViewModel viewModel)
             {
+                // Verifique se os campos obrigatórios estão preenchidos
+                if (string.IsNullOrWhiteSpace(viewModel.ConsultaSelecionada.Descricao) ||
+                    viewModel.ConsultaSelecionada.ClienteId == 0 ||
+                    viewModel.ConsultaSelecionada.AnimalId == 0 ||
+                    viewModel.ConsultaSelecionada.VeterinarioId == 0 ||
+                    viewModel.ConsultaSelecionada.Data == default)
+                {
+                    // Fecha o dialog original antes de exibir a mensagem de erro
+                    ConsultaDialog.Hide();
+
+                    // Exiba uma mensagem de erro se algum campo obrigatório estiver vazio
+                    var errorDialog = new ContentDialog
+                    {
+                        Title = "Erro",
+                        Content = "Por favor, preencha todos os campos obrigatórios antes de salvar.",
+                        CloseButtonText = "Ok",
+                        XamlRoot = ConsultaDialog.XamlRoot // Certifique-se de configurar o XamlRoot
+                    };
+
+                    await errorDialog.ShowAsync();
+
+                    // Reabra o diálogo principal após o erro
+                    await ConsultaDialog.ShowAsync();
+
+                    return; // Sai para evitar salvar uma consulta inválida
+                }
+
+                // Salva a consulta se todos os campos forem válidos
                 await viewModel.SalvarConsultaAsync();
                 ConsultaDialog.Hide();
             }
         }
+
+
+
 
         private void OnAdicionarConsultaClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {

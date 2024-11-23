@@ -10,10 +10,11 @@ namespace Clinica_Vet.Models
     {
         public int Id { get; set; } // Chave primária
         public string Nome { get; set; }
-        public string Resultado { get; set; }
+        public string? Resultado { get; set; } // Pode ser nulo inicialmente
 
         public int ConsultaId { get; set; } // Chave estrangeira para Consulta
         public Consulta Consulta { get; set; }
     }
+
 
 }

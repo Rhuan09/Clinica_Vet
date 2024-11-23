@@ -44,12 +44,13 @@
         <!-- Floating Window -->
         <ContentDialog
             x:Name="ClienteDialog"
-            Title="{Binding ClienteSelecionado.Nome}"
-            PrimaryButtonText="Salvar"
-            SecondaryButtonText="Cancelar"
-            MaxHeight="600"
-            PrimaryButtonClick="OnSalvarClienteClick"
-            SecondaryButtonClick="OnCancelarClienteClick">
+    Title="{Binding ClienteSelecionado.Nome}"
+    PrimaryButtonText="Salvar"
+    SecondaryButtonText="Cancelar"
+    MaxHeight="600"
+    PrimaryButtonClick="OnSalvarClienteClick"
+    SecondaryButtonClick="OnCancelarClienteClick"
+    IsPrimaryButtonEnabled="{Binding IsSalvarHabilitado}">
 
             <ScrollViewer>
                 <StackPanel Spacing="16">

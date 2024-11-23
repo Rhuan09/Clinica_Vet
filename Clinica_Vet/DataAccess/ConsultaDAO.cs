@@ -23,7 +23,20 @@ namespace Clinica_Vet.DataAccess
         public async Task RegistrarAsync(Consulta entity)
         {
             _context.Consultas.Add(entity);
-            await _context.SaveChangesAsync();
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                Console.WriteLine($"Erro ao salvar alterações: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"Exceção interna: {ex.InnerException.Message}");
+                }
+                throw;
+            }
         }
 
         public async Task AtualizarAsync(Consulta entity)
