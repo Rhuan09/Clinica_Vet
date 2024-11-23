@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 
 namespace Clinica_Vet.Models
@@ -11,7 +12,7 @@ namespace Clinica_Vet.Models
         private string _endereco;
         private string _cep;
         private ObservableCollection<Animal> _animais;
-
+        public ICollection<Consulta>? Consultas { get; set; } = new List<Consulta>();
         public int Id { get; set; }
 
         public string Nome

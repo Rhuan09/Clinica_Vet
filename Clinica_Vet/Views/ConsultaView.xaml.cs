@@ -22,22 +22,79 @@ namespace Clinica_Vet.Views
             }
         }
 
-        private void OnConsultaSelecionadaChanged(object sender, SelectionChangedEventArgs e)
+        private async void OnExcluirConsultaClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
             if (DataContext is ConsultaViewModel viewModel && viewModel.ConsultaSelecionada != null)
             {
-                ConsultaDialog.ShowAsync();
+                // Fecha o diálogo atual antes de abrir outro
+                ConsultaDialog.Hide();
+
+                var confirmDialog = new ContentDialog
+                {
+                    Title = "Confirmar exclusão",
+                    Content = "Tem certeza de que deseja excluir esta consulta?",
+                    PrimaryButtonText = "Sim",
+                    CloseButtonText = "Não",
+                    DefaultButton = ContentDialogButton.Close,
+                    XamlRoot = this.XamlRoot // Configura o XamlRoot corretamente
+                };
+
+                var result = await confirmDialog.ShowAsync();
+                if (result == ContentDialogResult.Primary)
+                {
+                    await viewModel.ExcluirConsultaAsync();
+                }
+                else
+                {
+                    // Reabre o `ConsultaDialog` se a exclusão for cancelada
+                    ConsultaDialog.XamlRoot = this.XamlRoot; // Define o XamlRoot
+                    await ConsultaDialog.ShowAsync();
+                }
             }
         }
+
+        private bool isConsultaDialogOpen = false;
+
+        private async void OnConsultaSelecionadaChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (isConsultaDialogOpen)
+                return;
+
+            if (DataContext is ConsultaViewModel viewModel && viewModel.ConsultaSelecionada != null)
+            {
+                try
+                {
+                    isConsultaDialogOpen = true;
+
+                    ConsultaDialog.XamlRoot = this.XamlRoot; // Define o XamlRoot
+                    ConsultaDialog.DataContext = viewModel; // Define o DataContext
+                    await ConsultaDialog.ShowAsync(); // Aguarda o diálogo
+                }
+                catch (Exception ex)
+                {
+                    // Log da exceção
+                    System.Diagnostics.Debug.WriteLine($"Erro ao exibir o diálogo: {ex.Message}");
+                }
+                finally
+                {
+                    isConsultaDialogOpen = false;
+                }
+            }
+        }
+
 
         private void OnCancelarConsultaClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
         {
             ConsultaDialog.Hide();
+            if (DataContext is ConsultaViewModel viewModel)
+            {
+                viewModel.ConsultaSelecionada = null;
+            }
         }
 
         private async void OnClienteSelecionadoChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (DataContext is ConsultaViewModel viewModel)
+            if (DataContext is ConsultaViewModel viewModel && viewModel.ConsultaSelecionada != null)
             {
                 await viewModel.CarregarAnimaisDoClienteAsync();
             }
@@ -48,47 +105,51 @@ namespace Clinica_Vet.Views
         {
             if (DataContext is ConsultaViewModel viewModel)
             {
-                // Verifique se os campos obrigatórios estão preenchidos
                 if (string.IsNullOrWhiteSpace(viewModel.ConsultaSelecionada.Descricao) ||
                     viewModel.ConsultaSelecionada.ClienteId == 0 ||
                     viewModel.ConsultaSelecionada.AnimalId == 0 ||
                     viewModel.ConsultaSelecionada.VeterinarioId == 0 ||
                     viewModel.ConsultaSelecionada.Data == default)
                 {
-                    // Fecha o dialog original antes de exibir a mensagem de erro
-                    ConsultaDialog.Hide();
-
-                    // Exiba uma mensagem de erro se algum campo obrigatório estiver vazio
                     var errorDialog = new ContentDialog
                     {
                         Title = "Erro",
                         Content = "Por favor, preencha todos os campos obrigatórios antes de salvar.",
                         CloseButtonText = "Ok",
-                        XamlRoot = ConsultaDialog.XamlRoot // Certifique-se de configurar o XamlRoot
+                        XamlRoot = this.XamlRoot
                     };
 
                     await errorDialog.ShowAsync();
-
-                    // Reabra o diálogo principal após o erro
-                    await ConsultaDialog.ShowAsync();
-
-                    return; // Sai para evitar salvar uma consulta inválida
+                    return;
                 }
 
-                // Salva a consulta se todos os campos forem válidos
-                await viewModel.SalvarConsultaAsync();
-                ConsultaDialog.Hide();
+                try
+                {
+                    await viewModel.SalvarConsultaAsync();
+                    ConsultaDialog.Hide();
+                    viewModel.ConsultaSelecionada = null;
+                }
+                catch (Exception ex)
+                {
+                    var errorDialog = new ContentDialog
+                    {
+                        Title = "Erro ao salvar",
+                        Content = $"Ocorreu um erro ao salvar a consulta: {ex.Message}",
+                        CloseButtonText = "Ok",
+                        XamlRoot = this.XamlRoot
+                    };
+
+                    await errorDialog.ShowAsync();
+                }
             }
         }
-
-
-
 
         private void OnAdicionarConsultaClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
             if (DataContext is ConsultaViewModel viewModel)
             {
                 viewModel.CriarNovaConsulta();
+                ConsultaDialog.XamlRoot = this.XamlRoot; // Define o XamlRoot
                 ConsultaDialog.ShowAsync();
             }
         }

@@ -53,7 +53,11 @@ namespace Clinica_Vet.DataAccess
 
         public async Task<List<Consulta>> ConsultarAsync()
         {
-            return await _context.Consultas.ToListAsync();
+            return await _context.Consultas
+                .Include(c => c.Cliente)
+                .Include(c => c.Animal)
+                .Include(c => c.Veterinario)
+                .ToListAsync();
         }
 
         public async Task<List<Consulta>> ConsultarAsync(Expression<Func<Consulta, bool>> filtro)

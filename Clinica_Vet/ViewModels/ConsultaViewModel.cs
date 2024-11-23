@@ -1,10 +1,8 @@
 ﻿using Clinica_Vet.DataAccess;
 using Clinica_Vet.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Clinica_Vet.ViewModels
@@ -17,11 +15,16 @@ namespace Clinica_Vet.ViewModels
         private readonly IDataAccess<Animal> _animalDao;
 
         [ObservableProperty]
-        private ObservableCollection<Animal> animaisDisponiveis;
+        private ObservableCollection<Consulta> consultas = new ObservableCollection<Consulta>();
 
-        public ObservableCollection<Consulta> Consultas { get; private set; }
-        public ObservableCollection<Cliente> Clientes { get; private set; }
-        public ObservableCollection<Veterinario> Veterinarios { get; private set; }
+        [ObservableProperty]
+        private ObservableCollection<Cliente> clientes = new ObservableCollection<Cliente>();
+
+        [ObservableProperty]
+        private ObservableCollection<Veterinario> veterinarios = new ObservableCollection<Veterinario>();
+
+        [ObservableProperty]
+        private ObservableCollection<Animal> animaisDisponiveis = new ObservableCollection<Animal>();
 
         [ObservableProperty]
         private Consulta consultaSelecionada;
@@ -39,17 +42,30 @@ namespace Clinica_Vet.ViewModels
             _clienteDao = clienteDao;
             _veterinarioDao = veterinarioDao;
             _animalDao = animalDao;
-
-            Consultas = new ObservableCollection<Consulta>();
-            Clientes = new ObservableCollection<Cliente>();
-            Veterinarios = new ObservableCollection<Veterinario>();
         }
 
         public async Task CarregarDadosAsync()
         {
-            Consultas = new ObservableCollection<Consulta>(await _consultaDao.ConsultarAsync());
-            Clientes = new ObservableCollection<Cliente>(await _clienteDao.ConsultarAsync());
-            Veterinarios = new ObservableCollection<Veterinario>(await _veterinarioDao.ConsultarAsync());
+            var consultasList = await _consultaDao.ConsultarAsync();
+            Consultas.Clear();
+            foreach (var consulta in consultasList)
+            {
+                Consultas.Add(consulta);
+            }
+
+            var clientesList = await _clienteDao.ConsultarAsync();
+            Clientes.Clear();
+            foreach (var cliente in clientesList)
+            {
+                Clientes.Add(cliente);
+            }
+
+            var veterinariosList = await _veterinarioDao.ConsultarAsync();
+            Veterinarios.Clear();
+            foreach (var veterinario in veterinariosList)
+            {
+                Veterinarios.Add(veterinario);
+            }
         }
 
         public void CriarNovaConsulta()
@@ -59,19 +75,37 @@ namespace Clinica_Vet.ViewModels
                 Data = DateTime.Now,
                 Descricao = "Nova Consulta"
             };
+
+            HoraSelecionada = TimeSpan.Zero;
         }
 
         public async Task CarregarAnimaisDoClienteAsync()
         {
-            if (ConsultaSelecionada?.ClienteId == 0)
+            if (ConsultaSelecionada == null || ConsultaSelecionada.ClienteId == 0)
             {
-                AnimaisDisponiveis = new ObservableCollection<Animal>();
+                AnimaisDisponiveis.Clear();
                 return;
             }
 
-            var animais = await _animalDao.ConsultarAsync(a => a.ClienteId == ConsultaSelecionada.ClienteId);
+            int clienteId = ConsultaSelecionada.ClienteId;
 
-            AnimaisDisponiveis = new ObservableCollection<Animal>(animais);
+            var animais = await _animalDao.ConsultarAsync(a => a.ClienteId == clienteId);
+
+            AnimaisDisponiveis.Clear();
+            foreach (var animal in animais)
+            {
+                AnimaisDisponiveis.Add(animal);
+            }
+        }
+
+        public async Task ExcluirConsultaAsync()
+        {
+            if (ConsultaSelecionada != null)
+            {
+                await _consultaDao.RemoverAsync(ConsultaSelecionada);
+                Consultas.Remove(ConsultaSelecionada);
+                ConsultaSelecionada = null;
+            }
         }
 
         public async Task SalvarConsultaAsync()
@@ -88,11 +122,10 @@ namespace Clinica_Vet.ViewModels
             // Verifica se os IDs estão setados
             if (ConsultaSelecionada.ClienteId == 0 ||
                 ConsultaSelecionada.VeterinarioId == 0 ||
-                ConsultaSelecionada.AnimalId == 0) 
+                ConsultaSelecionada.AnimalId == 0)
             {
                 // Exiba uma mensagem de erro ou lance uma exceção
-                
-                throw new InvalidOperationException("Cliente, Veterinário  Animal são obrigatórios.");
+                throw new InvalidOperationException("Cliente, Veterinário e Animal são obrigatórios.");
             }
 
             if (string.IsNullOrEmpty(ConsultaSelecionada.Relatorio))

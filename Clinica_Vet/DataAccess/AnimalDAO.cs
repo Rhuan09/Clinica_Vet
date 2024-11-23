@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
 using Clinica_Vet.DbContexts;
 using Clinica_Vet.Models;
 using Microsoft.EntityFrameworkCore;
-
 
 namespace Clinica_Vet.DataAccess
 {
@@ -51,12 +49,10 @@ namespace Clinica_Vet.DataAccess
             // Aplica o filtro, se fornecido
             if (filtro != null)
             {
-                animais = animais.Where(filtro).AsQueryable();
+                animais = animais.Where(filtro);
             }
 
             return await animais.ToListAsync();
         }
-
     }
-
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 
 namespace Clinica_Vet.Models
@@ -107,6 +108,8 @@ namespace Clinica_Vet.Models
                 }
             }
         }
+
+        public ICollection<Consulta>? Consultas { get; set; } = new List<Consulta>();
 
         public event PropertyChangedEventHandler PropertyChanged;
 

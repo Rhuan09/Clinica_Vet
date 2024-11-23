@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Clinica_Vet.Models
 {
@@ -21,7 +18,7 @@ namespace Clinica_Vet.Models
         public int ClienteId { get; set; } // Chave estrangeira para Cliente
         public Cliente Cliente { get; set; }
 
-        public int? TratamentoId { get; set; } // Chave estrangeira para Tratamento (agora opcional)
+        public int? TratamentoId { get; set; } // Chave estrangeira para Tratamento (opcional)
         public Tratamento? Tratamento { get; set; } // Propriedade de navegação
 
         public ICollection<Exame>? Exames { get; set; } = new List<Exame>(); // Relação 1:N com Exames
@@ -29,6 +26,4 @@ namespace Clinica_Vet.Models
         public string? Relatorio { get; set; }
         public string Descricao { get; set; } // Detalhes ou descrição da consulta
     }
-
-
 }

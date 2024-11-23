@@ -8,7 +8,7 @@ namespace Clinica_Vet.Models
 {
     public class Veterinario : Usuario
     {
-        public List<Consulta> Consultas { get; set; } = new(); // Relação 1:N com Consulta
+        public ICollection<Consulta> Consultas { get; set; } = new List<Consulta>();
     }
 
 }

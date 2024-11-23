@@ -1,9 +1,7 @@
 ﻿using Clinica_Vet.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.UI.Xaml.Documents;
 using System;
-using Windows.System;
 
 namespace Clinica_Vet.DbContexts
 {
@@ -22,8 +20,8 @@ namespace Clinica_Vet.DbContexts
         {
             string databasePath = @"C:\Users\rhuan\source\repos\Clinica_Vet\Clinica_Vet\veterinario.db";
             optionsBuilder.UseSqlite($"Data Source={databasePath}")
-            .LogTo(Console.WriteLine, LogLevel.Information); // Loga no console
-
+                .EnableSensitiveDataLogging() // Habilita o logging de dados sensíveis
+                .LogTo(Console.WriteLine, LogLevel.Information); // Loga no console
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -34,54 +32,49 @@ namespace Clinica_Vet.DbContexts
                 .WithOne(a => a.Cliente)
                 .HasForeignKey(a => a.ClienteId);
 
-            // Animal 1:N Tratamento
+            // Animal 1:N Consulta
             modelBuilder.Entity<Animal>()
-                .HasMany(a => a.Tratamentos)
-                .WithOne(t => t.Animal)
-                .HasForeignKey(t => t.AnimalId);
-
-            // Relação Consulta-Animal
-            modelBuilder.Entity<Consulta>()
-                .HasOne(c => c.Animal)
-                .WithMany()
+                .HasMany(a => a.Consultas)
+                .WithOne(c => c.Animal)
                 .HasForeignKey(c => c.AnimalId)
-                .OnDelete(DeleteBehavior.Cascade); // Deleção em cascata
-            // Relação Consulta-Veterinário
-            modelBuilder.Entity<Consulta>()
-                .HasOne(c => c.Veterinario)
-                .WithMany()
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Veterinario 1:N Consulta
+            modelBuilder.Entity<Veterinario>()
+                .HasMany(v => v.Consultas)
+                .WithOne(c => c.Veterinario)
                 .HasForeignKey(c => c.VeterinarioId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Relação Consulta-Cliente
-            modelBuilder.Entity<Consulta>()
-                .HasOne(c => c.Cliente)
-                .WithMany()
+            // Cliente 1:N Consulta
+            modelBuilder.Entity<Cliente>()
+                .HasMany(cl => cl.Consultas)
+                .WithOne(c => c.Cliente)
                 .HasForeignKey(c => c.ClienteId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Relação Consulta-Tratamento
-            modelBuilder.Entity<Consulta>()
-                .HasOne(c => c.Tratamento)
-                .WithMany(t => t.Consultas)
-                .HasForeignKey(c => c.TratamentoId)
-                .IsRequired(false) // Permitir valores nulos
-                .OnDelete(DeleteBehavior.SetNull);
-
-            // Relação Consulta-Exame
+            // Consulta 1:N Exame
             modelBuilder.Entity<Exame>()
                 .HasOne(e => e.Consulta)
                 .WithMany(c => c.Exames)
                 .HasForeignKey(e => e.ConsultaId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Relação Tratamento-Animal
+            // Tratamento N:1 Animal
             modelBuilder.Entity<Tratamento>()
                 .HasOne(t => t.Animal)
-                .WithMany()
+                .WithMany(a => a.Tratamentos)
                 .HasForeignKey(t => t.AnimalId)
-                .IsRequired(false); // Permitir valores nulos
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.SetNull);
 
+            // Consulta N:1 Tratamento
+            modelBuilder.Entity<Consulta>()
+                .HasOne(c => c.Tratamento)
+                .WithMany(t => t.Consultas)
+                .HasForeignKey(c => c.TratamentoId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }
