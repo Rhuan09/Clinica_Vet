@@ -60,6 +60,7 @@ namespace Clinica_Vet
             services.AddScoped<ClienteViewModel>();
             services.AddScoped<ProdutoViewModel>();
             services.AddScoped<VeterinarioViewModel>();
+            Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride = "pt-BR";
 
             Ioc.Default.ConfigureServices(services.BuildServiceProvider());
         }

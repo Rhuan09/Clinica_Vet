@@ -3,11 +3,13 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:toolkit="using:CommunityToolkit.WinUI.UI.Controls"
-    xmlns:converters="using:Clinica_Vet.Converters">
+    xmlns:converters="using:Clinica_Vet.Converters"
+    Language="pt-BR">
 
     <Page.Resources>
         <converters:IdToVisibilityConverter x:Key="IdToVisibilityConverter" />
         <converters:TimeSpanToStringConverter x:Key="TimeSpanToStringConverter" />
+        <converters:DateTimeOffsetToDateTimeConverter x:Key="DateTimeOffsetToDateTimeConverter" />
         <DataTemplate x:Key="TimeSpanItemTemplate">
             <TextBlock Text="{Binding Converter={StaticResource TimeSpanToStringConverter}}" />
         </DataTemplate>
@@ -89,7 +91,8 @@
 
                     <!-- Data -->
                     <DatePicker Header="Data"
-                                Date="{Binding ConsultaSelecionada.Data, Mode=TwoWay}" />
+                                Date="{Binding ConsultaSelecionada.Data, Mode=TwoWay, Converter={StaticResource DateTimeOffsetToDateTimeConverter}}"
+                                MinYear="{Binding MinDate}" />
 
                     <!-- Hora -->
                     <ComboBox Header="Hora"

@@ -38,6 +38,9 @@ namespace Clinica_Vet.ViewModels
         [ObservableProperty]
         private TimeSpan horaSelecionada;
 
+        public DateTimeOffset MinDate => new DateTimeOffset(DateTime.Now.Date);
+
+
         public ConsultaViewModel(
             IDataAccess<Consulta> consultaDao,
             IDataAccess<Cliente> clienteDao,

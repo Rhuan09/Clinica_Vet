@@ -17,6 +17,7 @@
             <converters:NullToBooleanConverter x:Key="NullToBooleanConverter" />
             <converters:IdToVisibilityConverter x:Key="IdToVisibilityConverter"/>
             <converters:TimeSpanToStringConverter x:Key="TimeSpanToStringConverter"/>
+            <converters:DateTimeOffsetToDateTimeConverter x:Key="DateTimeOffsetToDateTimeConverter"/>
 
 
             <!-- Other app resources here -->
