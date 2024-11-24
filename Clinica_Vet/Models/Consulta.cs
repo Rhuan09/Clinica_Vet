@@ -9,7 +9,7 @@ namespace Clinica_Vet.Models
         private int id;
         private DateTime data;
         private string descricao;
-        private string relatorio;
+        private string? relatorio;
         private int clienteId;
         private Cliente cliente;
         private int animalId;
@@ -63,7 +63,7 @@ namespace Clinica_Vet.Models
         }
 
         // Propriedade: Relatorio
-        public string Relatorio
+        public string? Relatorio
         {
             get => relatorio;
             set
