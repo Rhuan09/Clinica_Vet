@@ -48,40 +48,21 @@ namespace Clinica_Vet.Views
                 {
                     // Reabre o `ConsultaDialog` se a exclusão for cancelada
                     ConsultaDialog.XamlRoot = this.XamlRoot; // Define o XamlRoot
+                    ConsultaDialog.DataContext = viewModel;
                     await ConsultaDialog.ShowAsync();
                 }
             }
         }
 
-        private bool isConsultaDialogOpen = false;
-
         private async void OnConsultaSelecionadaChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (isConsultaDialogOpen)
-                return;
-
             if (DataContext is ConsultaViewModel viewModel && viewModel.ConsultaSelecionada != null)
             {
-                try
-                {
-                    isConsultaDialogOpen = true;
-
-                    ConsultaDialog.XamlRoot = this.XamlRoot; // Define o XamlRoot
-                    ConsultaDialog.DataContext = viewModel; // Define o DataContext
-                    await ConsultaDialog.ShowAsync(); // Aguarda o diálogo
-                }
-                catch (Exception ex)
-                {
-                    // Log da exceção
-                    System.Diagnostics.Debug.WriteLine($"Erro ao exibir o diálogo: {ex.Message}");
-                }
-                finally
-                {
-                    isConsultaDialogOpen = false;
-                }
+                ConsultaDialog.XamlRoot = this.XamlRoot; // Define o XamlRoot
+                ConsultaDialog.DataContext = viewModel;
+                await ConsultaDialog.ShowAsync();
             }
         }
-
 
         private void OnCancelarConsultaClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
         {
@@ -99,7 +80,6 @@ namespace Clinica_Vet.Views
                 await viewModel.CarregarAnimaisDoClienteAsync();
             }
         }
-
 
         private async void OnSalvarConsultaClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
         {
@@ -150,6 +130,7 @@ namespace Clinica_Vet.Views
             {
                 viewModel.CriarNovaConsulta();
                 ConsultaDialog.XamlRoot = this.XamlRoot; // Define o XamlRoot
+                ConsultaDialog.DataContext = viewModel;
                 ConsultaDialog.ShowAsync();
             }
         }

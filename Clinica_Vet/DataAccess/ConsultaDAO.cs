@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
 using Clinica_Vet.DbContexts;
 using Clinica_Vet.Models;
 using Microsoft.EntityFrameworkCore;
-
 
 namespace Clinica_Vet.DataAccess
 {
@@ -62,8 +60,11 @@ namespace Clinica_Vet.DataAccess
 
         public async Task<List<Consulta>> ConsultarAsync(Expression<Func<Consulta, bool>> filtro)
         {
-            return await _context.Consultas.Where(filtro).ToListAsync();
+            return await _context.Consultas
+                .Include(c => c.Cliente)
+                .Include(c => c.Animal)
+                .Include(c => c.Veterinario)
+                .Where(filtro).ToListAsync();
         }
     }
-
 }

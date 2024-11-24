@@ -2,7 +2,10 @@
 using Clinica_Vet.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Clinica_Vet.ViewModels
@@ -25,6 +28,9 @@ namespace Clinica_Vet.ViewModels
 
         [ObservableProperty]
         private ObservableCollection<Animal> animaisDisponiveis = new ObservableCollection<Animal>();
+
+        [ObservableProperty]
+        private ObservableCollection<TimeSpan> horariosDisponiveis = new ObservableCollection<TimeSpan>();
 
         [ObservableProperty]
         private Consulta consultaSelecionada;
@@ -53,18 +59,24 @@ namespace Clinica_Vet.ViewModels
                 Consultas.Add(consulta);
             }
 
-            var clientesList = await _clienteDao.ConsultarAsync();
-            Clientes.Clear();
-            foreach (var cliente in clientesList)
+            if (Clientes.Count == 0)
             {
-                Clientes.Add(cliente);
+                var clientesList = await _clienteDao.ConsultarAsync();
+                Clientes.Clear();
+                foreach (var cliente in clientesList)
+                {
+                    Clientes.Add(cliente);
+                }
             }
 
-            var veterinariosList = await _veterinarioDao.ConsultarAsync();
-            Veterinarios.Clear();
-            foreach (var veterinario in veterinariosList)
+            if (Veterinarios.Count == 0)
             {
-                Veterinarios.Add(veterinario);
+                var veterinariosList = await _veterinarioDao.ConsultarAsync();
+                Veterinarios.Clear();
+                foreach (var veterinario in veterinariosList)
+                {
+                    Veterinarios.Add(veterinario);
+                }
             }
         }
 
@@ -72,7 +84,7 @@ namespace Clinica_Vet.ViewModels
         {
             ConsultaSelecionada = new Consulta
             {
-                Data = DateTime.Now,
+                Data = DateTime.Now.Date,
                 Descricao = "Nova Consulta"
             };
 
@@ -98,20 +110,84 @@ namespace Clinica_Vet.ViewModels
             }
         }
 
-        public async Task ExcluirConsultaAsync()
+        partial void OnConsultaSelecionadaChanged(Consulta oldValue, Consulta newValue)
         {
-            if (ConsultaSelecionada != null)
+            if (oldValue != null)
             {
-                await _consultaDao.RemoverAsync(ConsultaSelecionada);
-                Consultas.Remove(ConsultaSelecionada);
-                ConsultaSelecionada = null;
+                oldValue.PropertyChanged -= ConsultaSelecionada_PropertyChanged;
             }
+
+            if (newValue != null)
+            {
+                newValue.PropertyChanged += ConsultaSelecionada_PropertyChanged;
+            }
+
+            AtualizarHorariosDisponiveisAsync();
+        }
+
+        private void ConsultaSelecionada_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Consulta.VeterinarioId) || e.PropertyName == nameof(Consulta.Data))
+            {
+                AtualizarHorariosDisponiveisAsync();
+            }
+        }
+
+        public async Task AtualizarHorariosDisponiveisAsync()
+        {
+            HorariosDisponiveis.Clear();
+
+            if (ConsultaSelecionada == null || ConsultaSelecionada.VeterinarioId == 0 || ConsultaSelecionada.Data == default)
+            {
+                return;
+            }
+
+            int veterinarioId = ConsultaSelecionada.VeterinarioId;
+            DateTime dataConsulta = ConsultaSelecionada.Data.Date;
+
+            // Gera todos os horários possíveis no dia
+            var horariosPossiveis = GerarHorariosDoDia();
+
+            // Busca as consultas do veterinário na data selecionada
+            var consultasNoDia = await _consultaDao.ConsultarAsync(c =>
+                c.VeterinarioId == veterinarioId &&
+                c.Data.Date == dataConsulta &&
+                c.Id != ConsultaSelecionada.Id); // Exclui a própria consulta se estiver editando
+
+            // Obter os horários ocupados
+            var horariosOcupados = consultasNoDia.Select(c => c.Data.TimeOfDay).ToList();
+
+            // Filtrar os horários disponíveis
+            var horariosDisponiveis = horariosPossiveis.Except(horariosOcupados).ToList();
+
+            // Atualizar a coleção observável
+            foreach (var horario in horariosDisponiveis)
+            {
+                HorariosDisponiveis.Add(horario);
+            }
+        }
+
+        private List<TimeSpan> GerarHorariosDoDia()
+        {
+            var horarios = new List<TimeSpan>();
+            for (int hora = 8; hora <= 17; hora++)
+            {
+                horarios.Add(new TimeSpan(hora, 0, 0));
+                horarios.Add(new TimeSpan(hora, 30, 0));
+            }
+            return horarios;
         }
 
         public async Task SalvarConsultaAsync()
         {
             if (ConsultaSelecionada == null)
                 return;
+
+            // Validar se a data não é no passado
+            if (ConsultaSelecionada.Data.Date < DateTime.Now.Date)
+            {
+                throw new InvalidOperationException("A data da consulta não pode ser no passado.");
+            }
 
             // Combina a data e hora
             if (HoraSelecionada != null)
@@ -124,13 +200,19 @@ namespace Clinica_Vet.ViewModels
                 ConsultaSelecionada.VeterinarioId == 0 ||
                 ConsultaSelecionada.AnimalId == 0)
             {
-                // Exiba uma mensagem de erro ou lance uma exceção
                 throw new InvalidOperationException("Cliente, Veterinário e Animal são obrigatórios.");
             }
 
             if (string.IsNullOrEmpty(ConsultaSelecionada.Relatorio))
             {
                 ConsultaSelecionada.Relatorio = "Relatório padrão";
+            }
+
+            // Verificar disponibilidade do veterinário
+            bool isDisponivel = await VerificarDisponibilidadeVeterinarioAsync(ConsultaSelecionada);
+            if (!isDisponivel)
+            {
+                throw new InvalidOperationException("O horário selecionado não está mais disponível.");
             }
 
             if (ConsultaSelecionada.Id == 0)
@@ -143,6 +225,30 @@ namespace Clinica_Vet.ViewModels
             }
 
             await CarregarDadosAsync();
+        }
+
+        private async Task<bool> VerificarDisponibilidadeVeterinarioAsync(Consulta consulta)
+        {
+            DateTime inicio = consulta.Data;
+            DateTime fim = consulta.Data.AddMinutes(30);
+
+            var consultasConflitantes = await _consultaDao.ConsultarAsync(c =>
+                c.VeterinarioId == consulta.VeterinarioId &&
+                c.Id != consulta.Id &&
+                c.Data >= inicio && c.Data < fim
+            );
+
+            return !consultasConflitantes.Any();
+        }
+
+        public async Task ExcluirConsultaAsync()
+        {
+            if (ConsultaSelecionada == null)
+                return;
+
+            await _consultaDao.RemoverAsync(ConsultaSelecionada);
+            Consultas.Remove(ConsultaSelecionada);
+            ConsultaSelecionada = null;
         }
     }
 }

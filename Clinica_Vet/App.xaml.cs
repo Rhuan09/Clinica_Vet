@@ -22,6 +22,7 @@ using Windows.Foundation.Collections;
 using Clinica_Vet.Models;
 using Clinica_Vet.DbContexts;
 using Clinica_Vet.ViewModels;
+using System.Globalization;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -43,7 +44,8 @@ namespace Clinica_Vet
 
             // Registro do DbContext
             services.AddDbContext<AppDbContext>();
-
+            CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("pt-BR");
+            CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("pt-BR");
             // Registro das DAOs
             services.AddScoped<IDataAccess<Veterinario>, VeterinarioDAO>();
             services.AddScoped<IDataAccess<Cliente>, ClienteDAO>();

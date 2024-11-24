@@ -7,6 +7,10 @@
 
     <Page.Resources>
         <converters:IdToVisibilityConverter x:Key="IdToVisibilityConverter" />
+        <converters:TimeSpanToStringConverter x:Key="TimeSpanToStringConverter" />
+        <DataTemplate x:Key="TimeSpanItemTemplate">
+            <TextBlock Text="{Binding Converter={StaticResource TimeSpanToStringConverter}}" />
+        </DataTemplate>
     </Page.Resources>
 
     <Grid>
@@ -45,7 +49,7 @@
             </toolkit:DataGrid>
         </StackPanel>
 
-        <!-- Floating Window -->
+        <!-- ContentDialog -->
         <ContentDialog
             x:Name="ConsultaDialog"
             Title="{Binding ConsultaSelecionada.Descricao}"
@@ -57,31 +61,43 @@
 
             <ScrollViewer>
                 <StackPanel Spacing="16">
-                    <!-- Informações da Consulta -->
+                    <!-- Cliente -->
                     <ComboBox Header="Cliente"
                               ItemsSource="{Binding Clientes}"
                               DisplayMemberPath="Nome"
                               SelectedValuePath="Id"
                               SelectedValue="{Binding ConsultaSelecionada.ClienteId, Mode=TwoWay}"
                               SelectionChanged="OnClienteSelecionadoChanged" />
+
+                    <!-- Animal -->
                     <ComboBox Header="Animal"
                               ItemsSource="{Binding AnimaisDisponiveis}"
                               DisplayMemberPath="Nome"
                               SelectedValuePath="Id"
                               SelectedValue="{Binding ConsultaSelecionada.AnimalId, Mode=TwoWay}" />
+
+                    <!-- Veterinário -->
                     <ComboBox Header="Veterinário"
                               ItemsSource="{Binding Veterinarios}"
                               DisplayMemberPath="Nome"
                               SelectedValuePath="Id"
                               SelectedValue="{Binding ConsultaSelecionada.VeterinarioId, Mode=TwoWay}" />
+
+                    <!-- Descrição -->
                     <TextBox Header="Descrição"
                              Text="{Binding ConsultaSelecionada.Descricao, Mode=TwoWay}" />
+
+                    <!-- Data -->
                     <DatePicker Header="Data"
                                 Date="{Binding ConsultaSelecionada.Data, Mode=TwoWay}" />
-                    <TimePicker Header="Hora"
-                                Time="{Binding HoraSelecionada, Mode=TwoWay}" />
 
-                    <!-- Botões para ações adicionais -->
+                    <!-- Hora -->
+                    <ComboBox Header="Hora"
+                              ItemsSource="{Binding HorariosDisponiveis}"
+                              SelectedItem="{Binding HoraSelecionada, Mode=TwoWay}"
+                              ItemTemplate="{StaticResource TimeSpanItemTemplate}" />
+
+                    <!-- Botão Excluir -->
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="16" Margin="0,16,0,0">
                         <Button Content="Excluir" Click="OnExcluirConsultaClick" Background="LightCoral"
                                 Visibility="{Binding ConsultaSelecionada.Id, Converter={StaticResource IdToVisibilityConverter}}" />

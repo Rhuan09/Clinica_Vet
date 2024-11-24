@@ -16,6 +16,8 @@
             <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
             <converters:NullToBooleanConverter x:Key="NullToBooleanConverter" />
             <converters:IdToVisibilityConverter x:Key="IdToVisibilityConverter"/>
+            <converters:TimeSpanToStringConverter x:Key="TimeSpanToStringConverter"/>
+
 
             <!-- Other app resources here -->
         </ResourceDictionary>
