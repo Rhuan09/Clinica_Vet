@@ -23,6 +23,7 @@
             </NavigationViewItem>
             <NavigationViewItem Content="Clientes" Tag="ClienteView" Icon="Contact" />
             <NavigationViewItem Content="Veterinários" Tag="VeterinarioView" Icon="People" />
+            <NavigationViewItem Content="Area Pet" Tag="AreaPetView" Icon="World" />
         </NavigationView.MenuItems>
 
         <!-- Frame onde as páginas serão carregadas -->

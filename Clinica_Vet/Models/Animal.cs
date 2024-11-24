@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 
 namespace Clinica_Vet.Models
 {
@@ -13,10 +15,30 @@ namespace Clinica_Vet.Models
         private int? _especieId;
         private Especie _especie;
         private ObservableCollection<Tratamento> _tratamentos;
+        
+
 
         public int Id { get; set; }
         public int ClienteId { get; set; }
         public Cliente Cliente { get; set; }
+
+        public bool PossuiExamesPendentes
+        {
+            get
+            {
+                return Consultas != null &&
+                       Consultas.SelectMany(c => c.Exames ?? new System.Collections.Generic.List<Exame>())
+                                .Any(e => string.IsNullOrEmpty(e.Resultado));
+            }
+        }
+
+        public bool IsEmTratamento
+        {
+            get
+            {
+                return Tratamentos != null && Tratamentos.Any(t => t.DataFim >= DateTime.Now);
+            }
+        }
 
         public string Nome
         {

@@ -1,0 +1,94 @@
+<Page
+    x:Class="Clinica_Vet.Views.AreaPetView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:Clinica_Vet.ViewModels"
+    xmlns:converters="using:Clinica_Vet.Converters"
+    xmlns:controls="using:Microsoft.UI.Xaml.Controls"
+    Language="pt-BR">
+
+    <Page.Resources>
+        <!-- Conversores -->
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <converters:IdadeFormatConverter x:Key="IdadeFormatConverter" />
+        <converters:PesoFormatConverter x:Key="PesoFormatConverter" />
+
+        <!-- Estilo para os cards -->
+        <Style x:Key="AnimalCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="Gray"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Margin" Value="12"/>
+            <Setter Property="Padding" Value="16"/>
+            <Setter Property="Width" Value="220"/>
+            <Setter Property="Height" Value="280"/>
+            <Setter Property="IsTapEnabled" Value="True"/>
+        </Style>
+    </Page.Resources>
+
+    <Grid Padding="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Seleção de Cliente -->
+        <ComboBox x:Name="ClienteComboBox"
+                  PlaceholderText="Selecione um cliente"
+                  ItemsSource="{Binding Clientes}"
+                  DisplayMemberPath="Nome"
+                  SelectedItem="{Binding ClienteSelecionado, Mode=TwoWay}"
+                  IsEditable="True"
+                  IsTextSearchEnabled="True"
+                  Margin="0,0,0,16"
+                  SelectionChanged="ClienteComboBox_SelectionChanged"/>
+
+        <!-- Lista de Animais -->
+        <ScrollViewer Grid.Row="1">
+            <ItemsControl ItemsSource="{Binding AnimaisDoCliente}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <ItemsWrapGrid Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Style="{StaticResource AnimalCardStyle}" Tapped="Animal_Tapped">
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
+                                <!-- Nome do Animal -->
+                                <TextBlock Text="{Binding Nome}"
+                                           FontSize="20"
+                                           FontWeight="Bold"
+                                           TextAlignment="Center"/>
+
+                                <!-- Idade -->
+                                <TextBlock Text="{Binding Idade, Converter={StaticResource IdadeFormatConverter}}"
+                                           TextAlignment="Center"/>
+
+                                <!-- Peso -->
+                                <TextBlock Text="{Binding Peso, Converter={StaticResource PesoFormatConverter}}"
+                                           TextAlignment="Center"/>
+
+                                <!-- Indicadores -->
+                                <StackPanel Orientation="Vertical" Spacing="4" Margin="0,8,0,0">
+                                    <!-- Tratamento -->
+                                    <TextBlock Text="Em Tratamento"
+                                               Foreground="Red"
+                                               FontWeight="SemiBold"
+                                               Visibility="{Binding IsEmTratamento, Converter={StaticResource BoolToVisibilityConverter}}"
+                                               TextAlignment="Center"/>
+
+                                    <!-- Exames Pendentes -->
+                                    <TextBlock Text="Exames Pendentes"
+                                               Foreground="Orange"
+                                               FontWeight="SemiBold"
+                                               Visibility="{Binding PossuiExamesPendentes, Converter={StaticResource BoolToVisibilityConverter}}"
+                                               TextAlignment="Center"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</Page>

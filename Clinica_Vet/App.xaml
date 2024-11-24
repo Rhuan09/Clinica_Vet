@@ -18,6 +18,9 @@
             <converters:IdToVisibilityConverter x:Key="IdToVisibilityConverter"/>
             <converters:TimeSpanToStringConverter x:Key="TimeSpanToStringConverter"/>
             <converters:DateTimeOffsetToDateTimeConverter x:Key="DateTimeOffsetToDateTimeConverter"/>
+            <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+            <converters:PesoFormatConverter x:Key="PesoFormatConverter"/>
+            <converters:IdadeFormatConverter x:Key="IdadeFormatConverter"/>
 
 
             <!-- Other app resources here -->

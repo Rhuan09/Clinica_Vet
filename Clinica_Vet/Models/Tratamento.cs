@@ -12,7 +12,7 @@ namespace Clinica_Vet.Models
         public DateTime DataInicio { get; set; }
         public DateTime DataFim { get; set; }
 
-        public int AnimalId { get; set; } // Chave estrangeira para Animal
+        public int? AnimalId { get; set; } // Chave estrangeira para Animal
         public Animal Animal { get; set; }
 
         public ICollection<Consulta> Consultas { get; set; } = new List<Consulta>(); // Relação 1:N com Consulta

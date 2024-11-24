@@ -57,6 +57,7 @@ namespace Clinica_Vet
             services.AddScoped<IDataAccess<ProdutoHistorico>, ProdutoHistoricoDAO>();
             services.AddScoped<IDataAccess<Especie>, EspecieDAO>();
             services.AddScoped<HomeViewModel>();
+            services.AddScoped<AreaPetViewModel>();
             services.AddScoped<ConsultaViewModel>();
             services.AddScoped<ClienteViewModel>();
             services.AddScoped<EstoqueAtualViewModel>();

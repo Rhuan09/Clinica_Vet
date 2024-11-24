@@ -36,6 +36,21 @@ namespace Clinica_Vet.DataAccess
             return await _context.SaveChangesAsync();
         }
 
+        public async Task<List<Animal>> ConsultarAnimaisComPropriedadesAsync(Expression<Func<Animal, bool>> filtro = null)
+        {
+            IQueryable<Animal> query = _context.Animais
+                .Include(a => a.Tratamentos)
+                .Include(a => a.Consultas)
+                    .ThenInclude(c => c.Exames);
+
+            if (filtro != null)
+            {
+                query = query.Where(filtro);
+            }
+
+            return await query.ToListAsync();
+        }
+
         public async Task<List<Animal>> ConsultarAsync()
         {
             return await _context.Animais.ToListAsync();

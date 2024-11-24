@@ -53,6 +53,9 @@ namespace Clinica_Vet
                     case "HistoricoPage":
                         ContentFrame.Navigate(typeof(Views.HistoricoPage));
                         break;
+                    case "AreaPetView":
+                        ContentFrame.Navigate(typeof(Views.AreaPetView));
+                        break;
                     default:
                         ContentFrame.Navigate(typeof(Views.HomeView));
                         break;

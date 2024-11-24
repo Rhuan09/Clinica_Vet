@@ -62,26 +62,22 @@ namespace Clinica_Vet.ViewModels
                 Consultas.Add(consulta);
             }
 
-            if (Clientes.Count == 0)
+            // Sempre recarregar a lista de clientes e veterinários
+            var clientesList = await _clienteDao.ConsultarAsync();
+            Clientes.Clear();
+            foreach (var cliente in clientesList)
             {
-                var clientesList = await _clienteDao.ConsultarAsync();
-                Clientes.Clear();
-                foreach (var cliente in clientesList)
-                {
-                    Clientes.Add(cliente);
-                }
+                Clientes.Add(cliente);
             }
 
-            if (Veterinarios.Count == 0)
+            var veterinariosList = await _veterinarioDao.ConsultarAsync();
+            Veterinarios.Clear();
+            foreach (var veterinario in veterinariosList)
             {
-                var veterinariosList = await _veterinarioDao.ConsultarAsync();
-                Veterinarios.Clear();
-                foreach (var veterinario in veterinariosList)
-                {
-                    Veterinarios.Add(veterinario);
-                }
+                Veterinarios.Add(veterinario);
             }
         }
+
 
         public void CriarNovaConsulta()
         {
@@ -212,12 +208,20 @@ namespace Clinica_Vet.ViewModels
             }
 
             // Verificar disponibilidade do veterinário
-            bool isDisponivel = await VerificarDisponibilidadeVeterinarioAsync(ConsultaSelecionada);
-            if (!isDisponivel)
+            bool isVeterinarioDisponivel = await VerificarDisponibilidadeVeterinarioAsync(ConsultaSelecionada);
+            if (!isVeterinarioDisponivel)
             {
-                throw new InvalidOperationException("O horário selecionado não está mais disponível.");
+                throw new InvalidOperationException("O horário selecionado não está mais disponível para o veterinário.");
             }
 
+            // Verificar se o mesmo Pet já possui outra consulta no mesmo horário
+            bool isAnimalDisponivel = await VerificarDisponibilidadeAnimalAsync(ConsultaSelecionada);
+            if (!isAnimalDisponivel)
+            {
+                throw new InvalidOperationException("O Pet já possui uma consulta marcada no mesmo horário.");
+            }
+
+            // Registrar ou atualizar a consulta
             if (ConsultaSelecionada.Id == 0)
             {
                 await _consultaDao.RegistrarAsync(ConsultaSelecionada);
@@ -228,6 +232,21 @@ namespace Clinica_Vet.ViewModels
             }
 
             await CarregarDadosAsync();
+        }
+
+        // Método para verificar se o animal já possui outra consulta no mesmo horário
+        private async Task<bool> VerificarDisponibilidadeAnimalAsync(Consulta consulta)
+        {
+            DateTime inicio = consulta.Data;
+            DateTime fim = consulta.Data.AddMinutes(30); // Considera que a consulta dura 30 minutos
+
+            var consultasConflitantes = await _consultaDao.ConsultarAsync(c =>
+                c.AnimalId == consulta.AnimalId && // Mesmo animal
+                c.Id != consulta.Id &&            // Exclui a própria consulta (caso edição)
+                c.Data >= inicio && c.Data < fim  // Conflito no mesmo horário
+            );
+
+            return !consultasConflitantes.Any();
         }
 
         private async Task<bool> VerificarDisponibilidadeVeterinarioAsync(Consulta consulta)

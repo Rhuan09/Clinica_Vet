@@ -184,6 +184,7 @@ namespace Clinica_Vet.Views
 
         private void OnAdicionarConsultaClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
+            
             if (DataContext is ConsultaViewModel viewModel)
             {
                 viewModel.CriarNovaConsulta();
