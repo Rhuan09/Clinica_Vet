@@ -1,0 +1,39 @@
+<Page
+    x:Class="Clinica_Vet.Views.HistoricoPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:toolkit="using:CommunityToolkit.WinUI.UI.Controls"
+    Language="pt-BR">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Background="#0078D7" Padding="16" CornerRadius="4">
+            <TextBlock Text="Histórico de Produtos Removidos"
+                       Foreground="White"
+                       FontSize="24"
+                       FontWeight="Bold" />
+        </Border>
+
+        <!-- Conteúdo Principal -->
+        <StackPanel Grid.Row="1" Margin="16">
+            <!-- DataGrid de Produtos Removidos -->
+            <toolkit:DataGrid x:Name="HistoricoDataGrid"
+                              ItemsSource="{Binding ProdutosHistorico}"
+                              AutoGenerateColumns="False">
+                <toolkit:DataGrid.Columns>
+                    <toolkit:DataGridTextColumn Header="ID" Binding="{Binding Id}" />
+                    <toolkit:DataGridTextColumn Header="Nome" Binding="{Binding Nome}" />
+                    <toolkit:DataGridTextColumn Header="Data Entrada" Binding="{Binding DataEntrada}" />
+                    <toolkit:DataGridTextColumn Header="Data Validade" Binding="{Binding DataValidade}" />
+                    <toolkit:DataGridTextColumn Header="Data Saída" Binding="{Binding DataSaida}" />
+                    <toolkit:DataGridTextColumn Header="Veterinário" Binding="{Binding Veterinario.Nome}" />
+                </toolkit:DataGrid.Columns>
+            </toolkit:DataGrid>
+        </StackPanel>
+    </Grid>
+</Page>

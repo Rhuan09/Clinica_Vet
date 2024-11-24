@@ -15,7 +15,12 @@
         <NavigationView.MenuItems>
             <NavigationViewItem Content="Início" Tag="HomeView" Icon="Home" />
             <NavigationViewItem Content="Consultas" Tag="ConsultaView" Icon="Calendar" />
-            <NavigationViewItem Content="Estoque" Tag="ProdutoView" Icon="Shop" />
+            <NavigationViewItem Content="Produto" Icon="Shop">
+                <NavigationViewItem.MenuItems>
+                    <NavigationViewItem Content="Estoque Atual" Tag="EstoqueAtualPage" />
+                    <NavigationViewItem Content="Histórico" Tag="HistoricoPage" />
+                </NavigationViewItem.MenuItems>
+            </NavigationViewItem>
             <NavigationViewItem Content="Clientes" Tag="ClienteView" Icon="Contact" />
             <NavigationViewItem Content="Veterinários" Tag="VeterinarioView" Icon="People" />
         </NavigationView.MenuItems>
@@ -24,3 +29,4 @@
         <Frame x:Name="ContentFrame" />
     </NavigationView>
 </Window>
+

@@ -12,6 +12,7 @@ namespace Clinica_Vet.DbContexts
         public DbSet<Animal> Animais { get; set; }
         public DbSet<Especie> Especies { get; set; }
         public DbSet<Produto> Produtos { get; set; }
+        public DbSet<ProdutoHistorico> ProdutosHistorico { get; set; }
         public DbSet<Tratamento> Tratamentos { get; set; }
         public DbSet<Consulta> Consultas { get; set; }
         public DbSet<Exame> Exames { get; set; }

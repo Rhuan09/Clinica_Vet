@@ -14,8 +14,9 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Views\ConsultaView.xaml" />
+    <None Remove="Views\EstoqueAtualPage.xaml" />
+    <None Remove="Views\HistoricoPage.xaml" />
     <None Remove="Views\HomeView.xaml" />
-    <None Remove="Views\ProdutoView.xaml" />
     <None Remove="Views\VeterinarioView.xaml" />
   </ItemGroup>
 
@@ -58,12 +59,17 @@
     <Folder Include="Migrations\" />
   </ItemGroup>
   <ItemGroup>
-    <Page Update="Views\HomeView.xaml">
+    <Page Update="Views\HistoricoPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Page Update="Views\ProdutoView.xaml">
+    <Page Update="Views\EstoqueAtualPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\HomeView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>

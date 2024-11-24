@@ -41,14 +41,17 @@ namespace Clinica_Vet
                     case "ConsultaView":
                         ContentFrame.Navigate(typeof(Views.ConsultaView));
                         break;
-                    case "ProdutoView":
-                        ContentFrame.Navigate(typeof(Views.ProdutoView));
-                        break;
                     case "ClienteView":
                         ContentFrame.Navigate(typeof(Views.ClienteView));
                         break;
                     case "VeterinarioView":
                         ContentFrame.Navigate(typeof(Views.VeterinarioView));
+                        break;
+                    case "EstoqueAtualPage":
+                        ContentFrame.Navigate(typeof(Views.EstoqueAtualPage));
+                        break;
+                    case "HistoricoPage":
+                        ContentFrame.Navigate(typeof(Views.HistoricoPage));
                         break;
                     default:
                         ContentFrame.Navigate(typeof(Views.HomeView));

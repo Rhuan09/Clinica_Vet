@@ -10,9 +10,11 @@ namespace Clinica_Vet.Models
     {
         public int Id { get; set; } // Chave primária
         public string Nome { get; set; }
-        public DateTime? DataEntrada { get; set; }
+        public DateTime DataEntrada { get; set; }
         public DateTime? DataValidade { get; set; }
-        public DateTime? DataSaida { get; set; }
+        // Remova DataSaida, pois agora usaremos uma tabela separada para o histórico
+        public bool Ativo { get; set; } = true; // Indica se o produto está no estoque
     }
+
 
 }

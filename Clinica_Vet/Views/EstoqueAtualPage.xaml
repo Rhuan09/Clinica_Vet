@@ -1,0 +1,55 @@
+<Page
+    x:Class="Clinica_Vet.Views.EstoqueAtualPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:toolkit="using:CommunityToolkit.WinUI.UI.Controls"
+    xmlns:converters="using:Clinica_Vet.Converters"
+    Language="pt-BR">
+
+    <Page.Resources>
+        <!-- Converters necessários -->
+        <converters:IdToVisibilityConverter x:Key="IdToVisibilityConverter" />
+    </Page.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Background="#0078D7" Padding="16" CornerRadius="4">
+            <TextBlock Text="Estoque Atual"
+                       Foreground="White"
+                       FontSize="24"
+                       FontWeight="Bold" />
+        </Border>
+
+        <!-- Conteúdo Principal -->
+        <StackPanel Grid.Row="1" Margin="16">
+            <!-- Campo de Pesquisa -->
+            <TextBox x:Name="SearchBox"
+                     PlaceholderText="Pesquisar por nome"
+                     TextChanged="OnSearchTextChanged"
+                     Margin="0,0,0,16" />
+
+            <!-- Botão Adicionar -->
+            <Button Content="Adicionar Produto" Click="OnAdicionarProdutoClick" Margin="0,0,0,16" />
+
+            <!-- DataGrid de Produtos -->
+            <toolkit:DataGrid x:Name="ProdutosDataGrid"
+                              ItemsSource="{Binding ProdutosFiltrados}"
+                              AutoGenerateColumns="False"
+                              SelectionMode="Single"
+                              SelectedItem="{Binding ProdutoSelecionado, Mode=TwoWay}"
+                              SelectionChanged="OnProdutoSelecionadoChanged">
+                <toolkit:DataGrid.Columns>
+                    <toolkit:DataGridTextColumn Header="ID" Binding="{Binding Id}" />
+                    <toolkit:DataGridTextColumn Header="Nome" Binding="{Binding Nome}" />
+                    <toolkit:DataGridTextColumn Header="Data Entrada" Binding="{Binding DataEntrada}" />
+                    <toolkit:DataGridTextColumn Header="Data Validade" Binding="{Binding DataValidade}" />
+                </toolkit:DataGrid.Columns>
+            </toolkit:DataGrid>
+        </StackPanel>
+    </Grid>
+</Page>

@@ -54,11 +54,13 @@ namespace Clinica_Vet
             services.AddScoped<IDataAccess<Tratamento>, TratamentoDAO>();
             services.AddScoped<IDataAccess<Consulta>, ConsultaDAO>();
             services.AddScoped<IDataAccess<Exame>, ExameDAO>();
+            services.AddScoped<IDataAccess<ProdutoHistorico>, ProdutoHistoricoDAO>();
             services.AddScoped<IDataAccess<Especie>, EspecieDAO>();
             services.AddScoped<HomeViewModel>();
             services.AddScoped<ConsultaViewModel>();
             services.AddScoped<ClienteViewModel>();
-            services.AddScoped<ProdutoViewModel>();
+            services.AddScoped<EstoqueAtualViewModel>();
+            services.AddScoped<HistoricoViewModel>();
             services.AddScoped<VeterinarioViewModel>();
             Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride = "pt-BR";
 
