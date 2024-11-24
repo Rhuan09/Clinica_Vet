@@ -45,7 +45,7 @@ namespace Clinica_Vet.DbContexts
                 .HasMany(v => v.Consultas)
                 .WithOne(c => c.Veterinario)
                 .HasForeignKey(c => c.VeterinarioId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Cliente 1:N Consulta
             modelBuilder.Entity<Cliente>()

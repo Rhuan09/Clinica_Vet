@@ -130,7 +130,12 @@ namespace Clinica_Vet.Models
                 }
             }
         }
-
+        public void AtualizarIndicadores()
+        {
+            // Notifica que os indicadores foram alterados
+            OnPropertyChanged(nameof(IsEmTratamento));
+            OnPropertyChanged(nameof(PossuiExamesPendentes));
+        }
         public ICollection<Consulta>? Consultas { get; set; } = new List<Consulta>();
 
         public event PropertyChangedEventHandler PropertyChanged;

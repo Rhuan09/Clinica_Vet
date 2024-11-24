@@ -15,7 +15,7 @@
 
         <!-- Estilo para os cards -->
         <Style x:Key="AnimalCardStyle" TargetType="Border">
-            <Setter Property="Background" Value="Gray"/>
+            <Setter Property="Background" Value="Black"/>
             <Setter Property="CornerRadius" Value="12"/>
             <Setter Property="Margin" Value="12"/>
             <Setter Property="Padding" Value="16"/>
@@ -25,11 +25,20 @@
         </Style>
     </Page.Resources>
 
-    <Grid Padding="16">
+    <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Background="#0078D7" Padding="16" CornerRadius="4" Grid.Row="0">
+            <TextBlock Text="Area Pet" 
+                       Foreground="White" 
+                       FontSize="24" 
+                       FontWeight="Bold" />
+        </Border>
 
         <!-- Seleção de Cliente -->
         <ComboBox x:Name="ClienteComboBox"
@@ -39,11 +48,12 @@
                   SelectedItem="{Binding ClienteSelecionado, Mode=TwoWay}"
                   IsEditable="True"
                   IsTextSearchEnabled="True"
-                  Margin="0,0,0,16"
+                  Margin="0,16,0,16"
+                  Grid.Row="1"
                   SelectionChanged="ClienteComboBox_SelectionChanged"/>
 
         <!-- Lista de Animais -->
-        <ScrollViewer Grid.Row="1">
+        <ScrollViewer Grid.Row="2">
             <ItemsControl ItemsSource="{Binding AnimaisDoCliente}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -58,6 +68,10 @@
                                 <TextBlock Text="{Binding Nome}"
                                            FontSize="20"
                                            FontWeight="Bold"
+                                           TextAlignment="Center"/>
+
+                                <!-- Especie -->
+                                <TextBlock Text="{Binding Especie.Nome}"
                                            TextAlignment="Center"/>
 
                                 <!-- Idade -->
