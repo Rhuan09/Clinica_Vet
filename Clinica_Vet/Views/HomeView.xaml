@@ -42,10 +42,19 @@
                         <DataTemplate>
                             <Border BorderThickness="1" BorderBrush="Gray" Margin="4" Padding="8">
                                 <StackPanel>
-                                    <TextBlock Text="{Binding Veterinario.Nome}" 
-                                               FontWeight="Bold" />
-                                    <TextBlock Text="{Binding Cliente.Nome}" />
-                                    <TextBlock Text="{Binding DataFormatada}" />
+                                    <TextBlock FontWeight="Bold">
+                                    <Run Text="Veterinário: " />
+                                    <Run Text="{Binding Veterinario.Nome}" />
+                                    </TextBlock>
+                                    <TextBlock>
+                                    <Run Text="Cliente: " />
+                                    <Run Text="{Binding Cliente.Nome}" />
+                                    </TextBlock>
+                                    <TextBlock>
+                                    <Run Text="Nome do pet: " />
+                                    <Run Text="{Binding Animal.Nome}" />
+                                    </TextBlock>
+                                    <TextBlock Text="{Binding Data}" />
                                     <TextBlock Text="{Binding Relatorio}" TextWrapping="Wrap" />
                                 </StackPanel>
                             </Border>
