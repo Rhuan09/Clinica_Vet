@@ -190,8 +190,15 @@ namespace Clinica_Vet.ViewModels
             // Obter os horários ocupados
             var horariosOcupados = consultasNoDia.Select(c => c.Data.TimeOfDay).ToList();
 
-            // Filtrar os horários disponíveis
+            // Filtrar horários disponíveis
             var horariosDisponiveis = horariosPossiveis.Except(horariosOcupados).ToList();
+
+            // Remover horários que já passaram no mesmo dia
+            if (dataConsulta == DateTime.Now.Date)
+            {
+                TimeSpan horaAtual = DateTime.Now.TimeOfDay;
+                horariosDisponiveis = horariosDisponiveis.Where(h => h > horaAtual).ToList();
+            }
 
             // Atualizar a coleção observável
             foreach (var horario in horariosDisponiveis)
@@ -199,6 +206,7 @@ namespace Clinica_Vet.ViewModels
                 HorariosDisponiveis.Add(horario);
             }
         }
+
 
         private List<TimeSpan> GerarHorariosDoDia()
         {
