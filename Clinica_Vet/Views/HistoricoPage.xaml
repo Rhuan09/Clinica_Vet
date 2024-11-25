@@ -23,9 +23,9 @@
         <StackPanel Grid.Row="1" Margin="16">
             <!-- DataGrid de Produtos Removidos -->
             <toolkit:DataGrid x:Name="HistoricoDataGrid"
-                              ItemsSource="{Binding ProdutosHistorico}"
-                              AutoGenerateColumns="False"
-                              IsReadOnly="True">
+                  ItemsSource="{Binding ProdutosHistorico}"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True">
                 <toolkit:DataGrid.Columns>
                     <toolkit:DataGridTextColumn Header="ID" Binding="{Binding Id}" />
                     <toolkit:DataGridTextColumn Header="Nome" Binding="{Binding Nome}" />
@@ -33,8 +33,19 @@
                     <toolkit:DataGridTextColumn Header="Data Validade" Binding="{Binding DataValidade}" />
                     <toolkit:DataGridTextColumn Header="Data Saída" Binding="{Binding DataSaida}" />
                     <toolkit:DataGridTextColumn Header="Veterinário" Binding="{Binding Veterinario.Nome}" />
+                    <!-- Coluna com botão de exclusão -->
+                    <toolkit:DataGridTemplateColumn Header="Ações">
+                        <toolkit:DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="Excluir" 
+                            Click="OnExcluirProdutoClick"
+                            Tag="{Binding}" />
+                            </DataTemplate>
+                        </toolkit:DataGridTemplateColumn.CellTemplate>
+                    </toolkit:DataGridTemplateColumn>
                 </toolkit:DataGrid.Columns>
             </toolkit:DataGrid>
+
         </StackPanel>
     </Grid>
 </Page>
