@@ -6,10 +6,8 @@ using System.Collections.ObjectModel;
 using System.Runtime.ConstrainedExecution;
 using System.Threading.Tasks;
 
-
 namespace Clinica_Vet.ViewModels
 {
-
     public partial class VeterinarioViewModel : ObservableObject
     {
         private readonly IDataAccess<Veterinario> _dao;
@@ -20,51 +18,77 @@ namespace Clinica_Vet.ViewModels
         [ObservableProperty]
         private Veterinario veterinarioSelecionado;
 
+        // Propriedades para o formulário
         [ObservableProperty]
         private string nome;
-        [ObservableProperty]
-        private string endereco;
-        [ObservableProperty]
-        private string cep;
+
         [ObservableProperty]
         private string telefone;
+
+        [ObservableProperty]
+        private string endereco;
+
         [ObservableProperty]
         private string email;
+
+        [ObservableProperty]
+        private string cep;
 
         public VeterinarioViewModel(IDataAccess<Veterinario> dao)
         {
             _dao = dao;
             Veterinarios = new ObservableCollection<Veterinario>();
-            CarregarVeterinariosAsync();
+            _ = CarregarVeterinariosAsync();
         }
 
-        public VeterinarioViewModel()
+        private async Task CarregarVeterinariosAsync()
         {
-            Veterinarios = new ObservableCollection<Veterinario>();
+            var lista = await _dao.ConsultarAsync();
+            Veterinarios = new ObservableCollection<Veterinario>(lista);
+        }
+
+
+        [RelayCommand]
+        public async Task EditarAsync()
+        {
+            if (VeterinarioSelecionado == null)
+                return;
+
+            // Atualiza o veterinário selecionado no banco de dados
+            await _dao.AtualizarAsync(VeterinarioSelecionado);
+
+            // Não é necessário atualizar manualmente a lista local,
+            // pois a edição é feita diretamente no objeto vinculado.
         }
 
         [RelayCommand]
         public async Task AdicionarAsync()
         {
-            var novoVeterinario = new Veterinario { Nome = Nome, Endereco = Endereco, Cep = Cep, Telefone = Telefone, Email = Email };
+            if (string.IsNullOrWhiteSpace(Nome) || string.IsNullOrWhiteSpace(Telefone) ||
+                string.IsNullOrWhiteSpace(Endereco) || string.IsNullOrWhiteSpace(Email) ||
+                string.IsNullOrWhiteSpace(Cep))
+            {
+                return; // Validação básica para evitar adicionar dados incompletos
+            }
+
+            var novoVeterinario = new Veterinario
+            {
+                Nome = Nome,
+                Telefone = Telefone,
+                Endereco = Endereco,
+                Email = Email,
+                Cep = Cep
+            };
+
             await _dao.RegistrarAsync(novoVeterinario);
-            await CarregarVeterinariosAsync();
+
+            // Atualiza a lista local
+            Veterinarios.Add(novoVeterinario);
+
+            // Limpa os campos após adicionar
+            Nome = Telefone = Email = Endereco = Cep = string.Empty;
         }
 
-        [RelayCommand]
-        public async Task EditarAsync()
-        {
-            if (VeterinarioSelecionado == null) return;
-
-            VeterinarioSelecionado.Nome = Nome;
-            VeterinarioSelecionado.Endereco = Endereco;
-            VeterinarioSelecionado.Cep = Cep;
-            VeterinarioSelecionado.Telefone = Telefone;
-            VeterinarioSelecionado.Email = Email;
-
-            await _dao.AtualizarAsync(VeterinarioSelecionado);
-            await CarregarVeterinariosAsync();
-        }
 
         [RelayCommand]
         public async Task RemoverAsync()
@@ -72,13 +96,9 @@ namespace Clinica_Vet.ViewModels
             if (VeterinarioSelecionado == null) return;
 
             await _dao.RemoverAsync(VeterinarioSelecionado);
-            await CarregarVeterinariosAsync();
-        }
 
-        private async Task CarregarVeterinariosAsync()
-        {
-            var lista = await _dao.ConsultarAsync();
-            Veterinarios = new ObservableCollection<Veterinario>(lista);
+            // Remove localmente
+            Veterinarios.Remove(VeterinarioSelecionado);
         }
     }
 }
