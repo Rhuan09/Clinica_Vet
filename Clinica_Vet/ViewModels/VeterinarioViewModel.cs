@@ -3,6 +3,7 @@ using Clinica_Vet.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Runtime.ConstrainedExecution;
 using System.Threading.Tasks;
 
@@ -14,6 +15,13 @@ namespace Clinica_Vet.ViewModels
 
         [ObservableProperty]
         private ObservableCollection<Veterinario> veterinarios;
+
+        [ObservableProperty]
+        private ObservableCollection<Veterinario> veterinariosFiltrados;
+
+        [ObservableProperty]
+        private string termoPesquisa;
+
 
         [ObservableProperty]
         private Veterinario veterinarioSelecionado;
@@ -38,14 +46,10 @@ namespace Clinica_Vet.ViewModels
         {
             _dao = dao;
             Veterinarios = new ObservableCollection<Veterinario>();
+            VeterinariosFiltrados = new ObservableCollection<Veterinario>();
             _ = CarregarVeterinariosAsync();
         }
 
-        private async Task CarregarVeterinariosAsync()
-        {
-            var lista = await _dao.ConsultarAsync();
-            Veterinarios = new ObservableCollection<Veterinario>(lista);
-        }
 
 
         [RelayCommand]
@@ -89,6 +93,38 @@ namespace Clinica_Vet.ViewModels
             Nome = Telefone = Email = Endereco = Cep = string.Empty;
         }
 
+        public async Task CarregarVeterinariosAsync()
+        {
+            var lista = await _dao.ConsultarAsync();
+            Veterinarios.Clear();
+            foreach (var veterinario in lista)
+            {
+                Veterinarios.Add(veterinario);
+            }
+
+            AplicarFiltro(); // Inicializa os filtrados
+        }
+
+
+
+        public void AplicarFiltro()
+        {
+            if (string.IsNullOrWhiteSpace(TermoPesquisa))
+            {
+                VeterinariosFiltrados = new ObservableCollection<Veterinario>(Veterinarios);
+            }
+            else
+            {
+                var filtro = TermoPesquisa.ToLower();
+                var filtrados = Veterinarios.Where(v =>
+                    (!string.IsNullOrEmpty(v.Nome) && v.Nome.ToLower().Contains(filtro)) ||
+                    (!string.IsNullOrEmpty(v.Email) && v.Email.ToLower().Contains(filtro)) ||
+                    (!string.IsNullOrEmpty(v.Telefone) && v.Telefone.ToLower().Contains(filtro))
+                );
+
+                VeterinariosFiltrados = new ObservableCollection<Veterinario>(filtrados);
+            }
+        }
 
         [RelayCommand]
         public async Task RemoverAsync()

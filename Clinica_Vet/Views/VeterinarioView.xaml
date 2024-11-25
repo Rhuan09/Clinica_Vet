@@ -21,20 +21,22 @@
         <!-- Busca e Lista -->
         <StackPanel Grid.Row="1" Margin="16">
             <!-- Campo de busca -->
-            <TextBox PlaceholderText="Pesquisar Veterinário"
-                     Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
-                     Margin="0,0,0,16" />
+            <TextBox x:Name="SearchBox"
+         PlaceholderText="Pesquisar por nome"
+         TextChanged="OnSearchTextChanged"
+         Margin="0,0,0,16" />
+
 
             <!-- Botão de Adicionar -->
             <Button Content="Adicionar Veterinário" Click="OnAdicionarVeterinarioClick" Margin="0,0,0,16" />
 
             <!-- Tabela de Veterinários -->
             <toolkit:DataGrid x:Name="VeterinariosDataGrid"
-                              ItemsSource="{Binding Veterinarios}"
-                              AutoGenerateColumns="False"
-                              SelectionMode="Single"
-                              SelectedItem="{Binding VeterinarioSelecionado, Mode=TwoWay}"
-                              SelectionChanged="OnVeterinarioSelecionadoChanged">
+                  ItemsSource="{Binding VeterinariosFiltrados}"
+                  AutoGenerateColumns="False"
+                  SelectionMode="Single"
+                  SelectedItem="{Binding VeterinarioSelecionado, Mode=TwoWay}"
+                  SelectionChanged="OnVeterinarioSelecionadoChanged">
                 <toolkit:DataGrid.Columns>
                     <toolkit:DataGridTextColumn Header="ID" Binding="{Binding Id}" />
                     <toolkit:DataGridTextColumn Header="Nome" Binding="{Binding Nome}" />
