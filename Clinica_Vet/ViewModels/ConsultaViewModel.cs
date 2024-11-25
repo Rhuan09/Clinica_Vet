@@ -33,6 +33,12 @@ namespace Clinica_Vet.ViewModels
         private ObservableCollection<TimeSpan> horariosDisponiveis = new ObservableCollection<TimeSpan>();
 
         [ObservableProperty]
+        private string termoPesquisa;
+
+        [ObservableProperty]
+        private ObservableCollection<Consulta> consultasFiltradas;
+
+        [ObservableProperty]
         private Consulta consultaSelecionada;
 
         [ObservableProperty]
@@ -51,6 +57,8 @@ namespace Clinica_Vet.ViewModels
             _clienteDao = clienteDao;
             _veterinarioDao = veterinarioDao;
             _animalDao = animalDao;
+            Consultas = new ObservableCollection<Consulta>();
+            ConsultasFiltradas = new ObservableCollection<Consulta>();
         }
 
         public async Task CarregarDadosAsync()
@@ -75,9 +83,35 @@ namespace Clinica_Vet.ViewModels
             foreach (var veterinario in veterinariosList)
             {
                 Veterinarios.Add(veterinario);
+
             }
+
+            var lista = await _consultaDao.ConsultarAsync();
+            Consultas = new ObservableCollection<Consulta>(lista);
+
+            // Inicializa a lista filtrada
+            AplicarFiltro();
         }
 
+
+        public void AplicarFiltro()
+        {
+            if (string.IsNullOrWhiteSpace(TermoPesquisa))
+            {
+                ConsultasFiltradas = new ObservableCollection<Consulta>(Consultas);
+            }
+            else
+            {
+                var filtro = TermoPesquisa.ToLower();
+                var filtradas = Consultas.Where(c =>
+                    (!string.IsNullOrEmpty(c.Descricao) && c.Descricao.ToLower().Contains(filtro)) ||
+                    (c.Cliente != null && c.Cliente.Nome.ToLower().Contains(filtro)) ||
+                    (c.Animal != null && c.Animal.Nome.ToLower().Contains(filtro)) ||
+                    (c.Veterinario != null && c.Veterinario.Nome.ToLower().Contains(filtro)));
+
+                ConsultasFiltradas = new ObservableCollection<Consulta>(filtradas);
+            }
+        }
 
         public void CriarNovaConsulta()
         {

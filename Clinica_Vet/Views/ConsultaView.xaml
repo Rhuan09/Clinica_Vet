@@ -34,22 +34,26 @@
                 <Button Content="Adicionar Consulta"
                         Click="OnAdicionarConsultaClick"
                         Margin="0,0,0,16" />
-                <toolkit:DataGrid x:Name="ConsultasDataGrid"
-                                  ItemsSource="{Binding Consultas}"
-                                  AutoGenerateColumns="False"
-                                  SelectionMode="Single"
-                                  SelectedItem="{Binding ConsultaSelecionada, Mode=TwoWay}"
-                                  SelectionChanged="OnConsultaSelecionadaChanged">
-                    <toolkit:DataGrid.Columns>
-                        <toolkit:DataGridTextColumn Header="Data" Binding="{Binding Data}" />
-                        <toolkit:DataGridTextColumn Header="Cliente" Binding="{Binding Cliente.Nome}" />
-                        <toolkit:DataGridTextColumn Header="Animal" Binding="{Binding Animal.Nome}" />
-                        <toolkit:DataGridTextColumn Header="Veterinário" Binding="{Binding Veterinario.Nome}" />
-                        <toolkit:DataGridTextColumn Header="Descrição" Binding="{Binding Descricao}" />
-                        <toolkit:DataGridTextColumn Header="Relatório" Binding="{Binding Relatorio}" />
-                    </toolkit:DataGrid.Columns>
-                </toolkit:DataGrid>
-            </StackPanel>
+            <TextBox x:Name="SearchBox"
+         PlaceholderText="Pesquisar Consulta"
+         TextChanged="OnSearchTextChanged"
+         Margin="0,0,0,16" />
+            <toolkit:DataGrid x:Name="ConsultasDataGrid"
+                  ItemsSource="{Binding ConsultasFiltradas}"
+                  AutoGenerateColumns="False"
+                  SelectionMode="Single"
+                  SelectedItem="{Binding ConsultaSelecionada, Mode=TwoWay}"
+                  SelectionChanged="OnConsultaSelecionadaChanged">
+                <toolkit:DataGrid.Columns>
+                    <toolkit:DataGridTextColumn Header="Data" Binding="{Binding Data}" />
+                    <toolkit:DataGridTextColumn Header="Cliente" Binding="{Binding Cliente.Nome}" />
+                    <toolkit:DataGridTextColumn Header="Animal" Binding="{Binding Animal.Nome}" />
+                    <toolkit:DataGridTextColumn Header="Veterinário" Binding="{Binding Veterinario.Nome}" />
+                    <toolkit:DataGridTextColumn Header="Descrição" Binding="{Binding Descricao}" />
+                    <toolkit:DataGridTextColumn Header="Relatório" Binding="{Binding Relatorio}" />
+                </toolkit:DataGrid.Columns>
+            </toolkit:DataGrid>
+        </StackPanel>
 
             <!-- ContentDialog -->
             <ContentDialog
