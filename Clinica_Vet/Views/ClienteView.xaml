@@ -20,16 +20,17 @@
 
         <!-- Botão e Lista -->
         <StackPanel Grid.Row="1" Margin="16">
-            <TextBox PlaceholderText="Pesquisar Cliente"
-             Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
-             Margin="0,0,0,16" />
+            <TextBox x:Name="SearchBox"
+         PlaceholderText="Pesquisar Cliente"
+         TextChanged="OnSearchTextChanged"
+         Margin="0,0,0,16" />
             <Button Content="Adicionar Cliente" Click="OnAdicionarClienteClick" Margin="0,0,0,16" />
             <toolkit:DataGrid x:Name="ClientesDataGrid"
-                ItemsSource="{Binding Clientes}"
-                              AutoGenerateColumns="False"
-                              SelectionMode="Single"
-                              SelectedItem="{Binding ClienteSelecionado, Mode=TwoWay}"
-                              SelectionChanged="OnClienteSelecionadoChanged">
+                  ItemsSource="{Binding ClientesFiltrados}"
+                  AutoGenerateColumns="False"
+                  SelectionMode="Single"
+                  SelectedItem="{Binding ClienteSelecionado, Mode=TwoWay}"
+                  SelectionChanged="OnClienteSelecionadoChanged">
                 <toolkit:DataGrid.Columns>
                     <toolkit:DataGridTextColumn Header="ID" Binding="{Binding Id}" />
                     <toolkit:DataGridTextColumn Header="Nome" Binding="{Binding Nome}" />
@@ -39,6 +40,7 @@
                     <toolkit:DataGridTextColumn Header="CEP" Binding="{Binding Cep}" />
                 </toolkit:DataGrid.Columns>
             </toolkit:DataGrid>
+
         </StackPanel>
 
         <!-- Floating Window -->

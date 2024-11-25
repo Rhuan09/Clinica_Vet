@@ -223,6 +223,17 @@ namespace Clinica_Vet.Views
             }
         }
 
+        private void OnSearchTextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (DataContext is ClienteViewModel viewModel)
+            {
+                // Atualiza o termo de pesquisa no ViewModel
+                viewModel.TermoPesquisa = ((TextBox)sender).Text;
+
+                // Aplica o filtro
+                viewModel.AplicarFiltro();
+            }
+        }
 
 
 

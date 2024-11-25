@@ -33,6 +33,8 @@ namespace Clinica_Vet.ViewModels
         [ObservableProperty]
         private string searchQuery;
 
+        [ObservableProperty]
+        private string termoPesquisa;
 
         [ObservableProperty]
         private ObservableCollection<Especie> especiesDisponiveis; // Lista de espécies disponíveis
@@ -68,7 +70,8 @@ namespace Clinica_Vet.ViewModels
             _clienteDao = clienteDao;
             _animalDao = animalDao;
             _especieDao = especieDao;
-
+            Clientes = new ObservableCollection<Cliente>();
+            ClientesFiltrados = new ObservableCollection<Cliente>();
             _ = CarregarClientesAsync();
             _ = CarregarEspeciesAsync(); // Carregar espécies disponíveis
         }
@@ -106,21 +109,32 @@ namespace Clinica_Vet.ViewModels
             FiltrarClientes();
         }
 
-        private async Task CarregarClientesAsync()
+        public async Task CarregarClientesAsync()
         {
-            var todosClientes = await _clienteDao.ConsultarAsync();
+            var lista = await _clienteDao.ConsultarAsync();
+            Clientes = new ObservableCollection<Cliente>(lista);
 
-            foreach (var cliente in todosClientes)
-            {
-                // Carrega os animais relacionados somente do banco de dados
-                cliente.Animais = new ObservableCollection<Animal>(
-                    await _animalDao.ConsultarAsync(a => a.ClienteId == cliente.Id));
-            }
-
-            Clientes = new ObservableCollection<Cliente>(todosClientes);
+            // Inicializa a lista filtrada
+            AplicarFiltro();
         }
 
+        public void AplicarFiltro()
+        {
+            if (string.IsNullOrWhiteSpace(TermoPesquisa))
+            {
+                ClientesFiltrados = new ObservableCollection<Cliente>(Clientes);
+            }
+            else
+            {
+                var filtro = TermoPesquisa.ToLower();
+                var filtrados = Clientes.Where(c =>
+                    (!string.IsNullOrEmpty(c.Nome) && c.Nome.ToLower().Contains(filtro)) ||
+                    (!string.IsNullOrEmpty(c.Email) && c.Email.ToLower().Contains(filtro)) ||
+                    (!string.IsNullOrEmpty(c.Telefone) && c.Telefone.ToLower().Contains(filtro)));
 
+                ClientesFiltrados = new ObservableCollection<Cliente>(filtrados);
+            }
+        }
 
         private async Task CarregarEspeciesAsync()
         {
