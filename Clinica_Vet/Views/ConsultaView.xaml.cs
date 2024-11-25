@@ -63,6 +63,7 @@ namespace Clinica_Vet.Views
                     {
                         // Executa a exclusão
                         await viewModel.ExcluirConsultaAsync();
+                        viewModel.CarregarDadosAsync();
 
                         // Reseta a seleção para evitar referências obsoletas
                         viewModel.ConsultaSelecionada = null;

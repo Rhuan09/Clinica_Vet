@@ -200,7 +200,17 @@ namespace Clinica_Vet.Views
 
                     // Atualizar a lista de tratamentos do animal
                     animal.Tratamentos.Add(novoTratamento);
+                    AtualizarCardsAnimaisAsync();
+
+
                 }
+            }
+        }
+        private async Task AtualizarCardsAnimaisAsync()
+        {
+            if (DataContext is AreaPetViewModel viewModel && viewModel.ClienteSelecionado != null)
+            {
+                await viewModel.CarregarAnimaisDoClienteAsync();
             }
         }
 
@@ -258,6 +268,7 @@ namespace Clinica_Vet.Views
                         consultaSelecionada.Exames = new System.Collections.Generic.List<Exame>();
 
                     consultaSelecionada.Exames.Add(novoExame);
+                    AtualizarCardsAnimaisAsync();
                 }
             }
         }

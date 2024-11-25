@@ -42,6 +42,7 @@ namespace Clinica_Vet.DataAccess
             return await _context.Clientes.ToListAsync();
         }
 
+
         public async Task<List<Cliente>> ConsultarAsync(Expression<Func<Cliente, bool>> filtro)
         {
             return await _context.Clientes.Where(filtro).ToListAsync();

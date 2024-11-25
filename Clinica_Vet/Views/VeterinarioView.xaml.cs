@@ -118,6 +118,7 @@ namespace Clinica_Vet.Views
 
                     // Chamar o comando para adicionar
                     await viewModel.AdicionarAsync();
+                    await viewModel.CarregarVeterinariosAsync();
                 }
             }
         }
@@ -168,6 +169,7 @@ namespace Clinica_Vet.Views
                     {
                         // Executa a exclusão
                         await viewModel.RemoverAsync();
+                        viewModel.CarregarVeterinariosAsync();
 
                         // Reseta a seleção para evitar referências obsoletas
                         viewModel.VeterinarioSelecionado = null;

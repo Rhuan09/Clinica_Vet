@@ -17,6 +17,7 @@ namespace Clinica_Vet.DataAccess
         Task<int> RemoverAsync(T entity);  // Remover um registro (retorna número de linhas afetadas)
         Task<List<T>> ConsultarAsync();    // Consultar todos os registros
         Task<List<T>> ConsultarAsync(Expression<Func<T, bool>> filtro); // Consultar com filtro
+
     }
 
 }

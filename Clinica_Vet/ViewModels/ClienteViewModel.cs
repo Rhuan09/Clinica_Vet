@@ -111,12 +111,18 @@ namespace Clinica_Vet.ViewModels
 
         public async Task CarregarClientesAsync()
         {
+            Clientes.Clear(); // Limpa a lista existente
             var lista = await _clienteDao.ConsultarAsync();
-            Clientes = new ObservableCollection<Cliente>(lista);
 
-            // Inicializa a lista filtrada
+            foreach (var cliente in lista)
+            {
+                Clientes.Add(cliente); // Adiciona os novos clientes
+            }
+
+            // Atualiza a lista filtrada
             AplicarFiltro();
         }
+
 
         public void AplicarFiltro()
         {
@@ -158,7 +164,8 @@ namespace Clinica_Vet.ViewModels
             await _clienteDao.RegistrarAsync(novoCliente);
 
             // Atualiza a lista de clientes
-            Clientes.Add(novoCliente);
+            Clientes.Add(novoCliente); // Adiciona diretamente à ObservableCollection
+            AplicarFiltro(); // Reaplica o filtro
 
             // Limpa os campos do formulário
             Nome = Telefone = Email = Endereco = Cep = string.Empty;
@@ -255,16 +262,23 @@ namespace Clinica_Vet.ViewModels
                 }
             }
 
-            // Remove o cliente
+            // Remove o cliente do banco de dados
             await _clienteDao.RemoverAsync(ClienteSelecionado);
+
+            // Remove o cliente das listas locais
             Clientes.Remove(ClienteSelecionado);
+
+            // Reaplica o filtro para atualizar ClientesFiltrados
+            AplicarFiltro();
 
             // Limpa a seleção
             ClienteSelecionado = null;
 
-            // Atualiza a interface
+            // Notifica a interface para garantir que as mudanças sejam refletidas
             OnPropertyChanged(nameof(Clientes));
+            OnPropertyChanged(nameof(ClientesFiltrados));
         }
+
 
 
 

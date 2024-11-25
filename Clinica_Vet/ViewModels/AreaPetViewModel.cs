@@ -41,7 +41,10 @@ namespace Clinica_Vet.ViewModels
             foreach (var cliente in lista)
             {
                 Clientes.Add(cliente);
+
             }
+
+
         }
 
         public async Task CarregarAnimaisDoClienteAsync()
@@ -53,14 +56,18 @@ namespace Clinica_Vet.ViewModels
                 AnimaisDoCliente.Clear();
                 foreach (var animal in animais)
                 {
+
+
                     // Carregar tratamentos do animal
                     var tratamentosDao = Ioc.Default.GetRequiredService<IDataAccess<Tratamento>>();
                     var tratamentos = await tratamentosDao.ConsultarAsync(t => t.AnimalId == animal.Id);
                     animal.Tratamentos = new ObservableCollection<Tratamento>(tratamentos);
 
+
                     // Carregar as consultas do banco de dados e incluir os exames relacionados
                     var consultasDao = Ioc.Default.GetRequiredService<IDataAccess<Consulta>>();
                     var consultas = await consultasDao.ConsultarAsync(c => c.AnimalId == animal.Id);
+
 
                     // Garantir que cada consulta tenha os exames carregados
                     foreach (var consulta in consultas)
@@ -77,11 +84,13 @@ namespace Clinica_Vet.ViewModels
                         .ToList();
 
                     // Atualizar indicadores do animal
-                    animal.AtualizarIndicadores();
+                    animal.AtualizarIndicadores();  
 
                     // Adicionar o animal à lista observável
                     AnimaisDoCliente.Add(animal);
                 }
+
+
             }
             else
             {

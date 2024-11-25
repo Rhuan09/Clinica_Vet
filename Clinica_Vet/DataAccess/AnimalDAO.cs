@@ -36,12 +36,15 @@ namespace Clinica_Vet.DataAccess
             return await _context.SaveChangesAsync();
         }
 
-        public async Task<List<Animal>> ConsultarAnimaisComPropriedadesAsync(Expression<Func<Animal, bool>> filtro = null)
+        public async Task<List<Animal>> ConsultarComPropriedadesAsync(Expression<Func<Animal, bool>> filtro = null)
         {
             IQueryable<Animal> query = _context.Animais
+                .Include(a => a.Especie)
                 .Include(a => a.Tratamentos)
                 .Include(a => a.Consultas)
                     .ThenInclude(c => c.Exames);
+
+
 
             if (filtro != null)
             {
@@ -58,16 +61,18 @@ namespace Clinica_Vet.DataAccess
 
         public async Task<List<Animal>> ConsultarAsync(Expression<Func<Animal, bool>> filtro = null)
         {
-            // Busca todos os animais do banco de dados
-            var animais = _context.Animais.AsQueryable();
+            IQueryable<Animal> query = _context.Animais
+                .Include(a => a.Especie)         // Inclui a espécie associada
+                .Include(a => a.Tratamentos)    // Inclui os tratamentos
+                .Include(a => a.Consultas)      // Inclui as consultas
+                    .ThenInclude(c => c.Exames); // Inclui os exames das consultas
 
-            // Aplica o filtro, se fornecido
             if (filtro != null)
             {
-                animais = animais.Where(filtro);
+                query = query.Where(filtro);
             }
 
-            return await animais.ToListAsync();
+            return await query.ToListAsync();
         }
     }
 }
