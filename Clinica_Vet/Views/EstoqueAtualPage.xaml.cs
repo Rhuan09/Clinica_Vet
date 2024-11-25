@@ -8,6 +8,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Media;
 using System;
+using System.Linq;
 
 namespace Clinica_Vet.Views
 {
@@ -80,17 +81,6 @@ namespace Clinica_Vet.Views
                 Mode = BindingMode.TwoWay
             });
 
-            // Campo Data de Entrada
-            var dataEntradaPicker = new DatePicker
-            {
-                Header = "Data de Entrada"
-            };
-            dataEntradaPicker.SetBinding(DatePicker.DateProperty, new Binding
-            {
-                Path = new PropertyPath("ProdutoSelecionado.DataEntrada"),
-                Mode = BindingMode.TwoWay
-            });
-
             // Campo Data de Validade
             var dataValidadePicker = new DatePicker
             {
@@ -117,7 +107,6 @@ namespace Clinica_Vet.Views
             // Adicionar controles ao painel
             panel.Children.Add(errorTextBlock);
             panel.Children.Add(nomeTextBox);
-            panel.Children.Add(dataEntradaPicker);
             panel.Children.Add(dataValidadePicker);
             panel.Children.Add(removerButton);
 
@@ -138,6 +127,7 @@ namespace Clinica_Vet.Views
             return dialog;
         }
 
+
         private async void OnSalvarProdutoClick(ContentDialog sender, ContentDialogButtonClickEventArgs args, TextBlock errorTextBlock)
         {
             if (DataContext is EstoqueAtualViewModel viewModel)
@@ -146,6 +136,31 @@ namespace Clinica_Vet.Views
                 {
                     args.Cancel = true;
                     errorTextBlock.Text = "Por favor, preencha o nome do produto.";
+                    errorTextBlock.Visibility = Visibility.Visible;
+                    return;
+                }
+
+                // Atualizar DataValidade do ProdutoSelecionado explicitamente
+                var dialogContent = sender.Content as StackPanel;
+
+                if (dialogContent != null)
+                {
+                    var dataValidadePicker = dialogContent.Children
+                        .OfType<DatePicker>()
+                        .FirstOrDefault(p => p.Header?.ToString() == "Data de Validade");
+
+                    if (dataValidadePicker != null)
+                    {
+                        viewModel.ProdutoSelecionado.DataValidade = dataValidadePicker.Date.DateTime;
+                    }
+                }
+
+                // Validação da data de validade (depois de atribuir a data escolhida)
+                if (viewModel.ProdutoSelecionado.DataValidade.HasValue &&
+                    viewModel.ProdutoSelecionado.DataValidade < viewModel.ProdutoSelecionado.DataEntrada)
+                {
+                    args.Cancel = true;
+                    errorTextBlock.Text = "A data de validade deve ser maior ou igual à data de entrada.";
                     errorTextBlock.Visibility = Visibility.Visible;
                     return;
                 }
@@ -163,6 +178,7 @@ namespace Clinica_Vet.Views
                 }
             }
         }
+
 
         private void OnCancelarProdutoClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
         {

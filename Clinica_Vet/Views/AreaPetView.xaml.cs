@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using System;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -46,32 +47,24 @@ namespace Clinica_Vet.Views
 
         private async Task MostrarDialogoAnimalAsync(Animal animal)
         {
-            // Carregar os tratamentos do banco de dados e garantir que não haja duplicatas
+            // Carregar tratamentos
             var tratamentosDao = Ioc.Default.GetRequiredService<IDataAccess<Tratamento>>();
             var tratamentos = await tratamentosDao.ConsultarAsync(t => t.AnimalId == animal.Id);
-            animal.Tratamentos = new System.Collections.ObjectModel.ObservableCollection<Tratamento>(
-                tratamentos.DistinctBy(t => t.Descricao) // Remover duplicatas com base na descrição
-            );
+            animal.Tratamentos = new ObservableCollection<Tratamento>(tratamentos);
 
-            // Carregar as consultas do banco de dados e incluir os exames relacionados
+            // Carregar consultas e exames
             var consultasDao = Ioc.Default.GetRequiredService<IDataAccess<Consulta>>();
             var consultas = await consultasDao.ConsultarAsync(c => c.AnimalId == animal.Id);
-
-            // Garantir que cada consulta tenha os exames carregados
             foreach (var consulta in consultas)
             {
                 var examesDao = Ioc.Default.GetRequiredService<IDataAccess<Exame>>();
                 consulta.Exames = await examesDao.ConsultarAsync(e => e.ConsultaId == consulta.Id);
             }
+            var examesPendentes = consultas.SelectMany(c => c.Exames)
+                                           .Where(e => string.IsNullOrEmpty(e.Resultado))
+                                           .ToList();
 
-            // Filtrar os exames pendentes
-            var examesPendentes = consultas
-                .SelectMany(c => c.Exames)
-                .Where(e => string.IsNullOrEmpty(e.Resultado)) // Exames sem resultado
-                .DistinctBy(e => e.Nome) // Remover duplicatas por nome
-                .ToList();
-
-            // Configurar o diálogo
+            // Configurar diálogo
             var dialog = new ContentDialog
             {
                 Title = $"Detalhes do Pet - {animal.Nome}",
@@ -86,59 +79,85 @@ namespace Clinica_Vet.Views
             panel.Children.Add(new TextBlock { Text = $"Idade: {animal.Idade} anos" });
             panel.Children.Add(new TextBlock { Text = $"Peso: {animal.Peso} kg" });
 
-            // Botão para iniciar tratamento
+            // Botões de ação
+            var actionPanel = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 16 };
+
             var iniciarTratamentoButton = new Button { Content = "Iniciar Tratamento" };
             iniciarTratamentoButton.Click += async (s, e) =>
             {
                 dialog.Hide();
                 await MostrarDialogoIniciarTratamentoAsync(animal);
             };
-            panel.Children.Add(iniciarTratamentoButton);
+            actionPanel.Children.Add(iniciarTratamentoButton);
 
-            // Botão para adicionar exame
             var adicionarExameButton = new Button { Content = "Adicionar Exame" };
             adicionarExameButton.Click += async (s, e) =>
             {
                 dialog.Hide();
                 await MostrarDialogoAdicionarExameAsync(animal);
             };
-            panel.Children.Add(adicionarExameButton);
+            actionPanel.Children.Add(adicionarExameButton);
 
-            // Lista de tratamentos
-            var tratamentosHeader = new TextBlock
+            panel.Children.Add(actionPanel);
+
+            // Tratamentos
+            panel.Children.Add(new TextBlock
             {
                 Text = "Tratamentos Atuais",
                 FontSize = 16,
                 FontWeight = Microsoft.UI.Text.FontWeights.Bold
-            };
-            panel.Children.Add(tratamentosHeader);
+            });
 
-            var tratamentosList = new ListView
+            foreach (var tratamento in animal.Tratamentos)
             {
-                ItemsSource = animal.Tratamentos,
-                DisplayMemberPath = "Descricao"
-            };
-            panel.Children.Add(tratamentosList);
+                var tratamentoPanel = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8 };
+                tratamentoPanel.Children.Add(new TextBlock { Text = tratamento.Descricao });
+                tratamentoPanel.Children.Add(new TextBlock
+                {
+                    Text = $"Tempo restante: {Math.Max((tratamento.DataFim - DateTime.Now).Days, 0)} dias"
+                });
+                var deleteButton = new Button { Content = "Excluir" };
+                deleteButton.Click += async (s, e) => await ExcluirTratamentoAsync(tratamento);
+                tratamentoPanel.Children.Add(deleteButton);
+                panel.Children.Add(tratamentoPanel);
+            }
 
-            // Lista de exames pendentes
-            var examesHeader = new TextBlock
+            // Exames
+            panel.Children.Add(new TextBlock
             {
                 Text = "Exames Pendentes",
                 FontSize = 16,
                 FontWeight = Microsoft.UI.Text.FontWeights.Bold
-            };
-            panel.Children.Add(examesHeader);
+            });
 
-            var examesList = new ListView
+            foreach (var exame in examesPendentes)
             {
-                ItemsSource = new System.Collections.ObjectModel.ObservableCollection<Exame>(examesPendentes),
-                DisplayMemberPath = "Nome"
-            };
-            panel.Children.Add(examesList);
+                var examePanel = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8 };
+                examePanel.Children.Add(new TextBlock { Text = exame.Nome });
+                var deleteButton = new Button { Content = "Excluir" };
+                deleteButton.Click += async (s, e) => await ExcluirExameAsync(exame);
+                examePanel.Children.Add(deleteButton);
+                panel.Children.Add(examePanel);
+            }
 
             dialog.Content = new ScrollViewer { Content = panel };
 
             await dialog.ShowAsync();
+        }
+
+
+        private async Task ExcluirTratamentoAsync(Tratamento tratamento)
+        {
+            var tratamentoDao = Ioc.Default.GetRequiredService<IDataAccess<Tratamento>>();
+            await tratamentoDao.RemoverAsync(tratamento);
+            await AtualizarCardsAnimaisAsync();
+        }
+
+        private async Task ExcluirExameAsync(Exame exame)
+        {
+            var exameDao = Ioc.Default.GetRequiredService<IDataAccess<Exame>>();
+            await exameDao.RemoverAsync(exame);
+            await AtualizarCardsAnimaisAsync();
         }
 
 
@@ -178,6 +197,22 @@ namespace Clinica_Vet.Views
             };
             panel.Children.Add(descricaoTextBox);
 
+            // DatePicker para data de início
+            var dataInicioPicker = new DatePicker
+            {
+                Header = "Data de Início",
+                Date = DateTimeOffset.Now // Ajustado para DateTimeOffset
+            };
+            panel.Children.Add(dataInicioPicker);
+
+            // DatePicker para data de fim
+            var dataFimPicker = new DatePicker
+            {
+                Header = "Data de Fim",
+                Date = DateTimeOffset.Now.AddMonths(1) // Ajustado para DateTimeOffset
+            };
+            panel.Children.Add(dataFimPicker);
+
             dialog.Content = panel;
 
             var result = await dialog.ShowAsync();
@@ -186,26 +221,41 @@ namespace Clinica_Vet.Views
             {
                 if (consultaComboBox.SelectedItem is Consulta consultaSelecionada)
                 {
-                    var tratamentoDao = Ioc.Default.GetRequiredService<IDataAccess<Tratamento>>();
-
-                    var novoTratamento = new Tratamento
+                    if (dataInicioPicker.Date != null && dataFimPicker.Date != null)
                     {
-                        AnimalId = animal.Id,
-                        DataInicio = DateTime.Now,
-                        DataFim = DateTime.Now.AddMonths(1), // Duração de 1 mês
-                        Descricao = descricaoTextBox.Text
-                    };
+                        var tratamentoDao = Ioc.Default.GetRequiredService<IDataAccess<Tratamento>>();
 
-                    await tratamentoDao.RegistrarAsync(novoTratamento);
+                        var novoTratamento = new Tratamento
+                        {
+                            AnimalId = animal.Id,
+                            DataInicio = dataInicioPicker.Date.DateTime, // Converte DateTimeOffset para DateTime
+                            DataFim = dataFimPicker.Date.DateTime,       // Converte DateTimeOffset para DateTime
+                            Descricao = descricaoTextBox.Text
+                        };
 
-                    // Atualizar a lista de tratamentos do animal
-                    animal.Tratamentos.Add(novoTratamento);
-                    AtualizarCardsAnimaisAsync();
+                        await tratamentoDao.RegistrarAsync(novoTratamento);
 
+                        // Atualizar a lista de tratamentos do animal
+                        animal.Tratamentos.Add(novoTratamento);
+                        await AtualizarCardsAnimaisAsync();
+                    }
+                    else
+                    {
+                        var errorDialog = new ContentDialog
+                        {
+                            Title = "Erro",
+                            Content = "Por favor, preencha as datas de início e fim corretamente.",
+                            CloseButtonText = "Ok",
+                            XamlRoot = this.XamlRoot
+                        };
 
+                        await errorDialog.ShowAsync();
+                    }
                 }
             }
         }
+
+
         private async Task AtualizarCardsAnimaisAsync()
         {
             if (DataContext is AreaPetViewModel viewModel && viewModel.ClienteSelecionado != null)

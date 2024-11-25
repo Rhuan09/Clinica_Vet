@@ -28,10 +28,18 @@ namespace Clinica_Vet
             this.InitializeComponent();
             ContentFrame.Navigate(typeof(Views.HomeView)); // Define a página inicial
         }
+        
+
 
         private void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
         {
-            if (args.SelectedItemContainer is NavigationViewItem item)
+            if (args.IsSettingsSelected)
+            {
+                // Quando o botão de configurações é clicado, navegue para a página de configurações
+                ContentFrame.Navigate(typeof(Views.ConfiguracoesPage));
+            }
+
+            else if (args.SelectedItemContainer is NavigationViewItem item)
             {
                 switch (item.Tag)
                 {

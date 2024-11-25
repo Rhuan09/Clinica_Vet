@@ -125,6 +125,7 @@ namespace Clinica_Vet.Views
                         ClienteId = viewModel.ClienteSelecionado.Id,
                         EspecieId = especieId.Value
                     });
+                    viewModel.ClienteSelecionado = null;
 
                 }
 

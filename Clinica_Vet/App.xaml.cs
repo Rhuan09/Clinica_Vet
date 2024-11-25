@@ -62,6 +62,7 @@ namespace Clinica_Vet
             services.AddScoped<ClienteViewModel>();
             services.AddScoped<EstoqueAtualViewModel>();
             services.AddScoped<HistoricoViewModel>();
+            services.AddScoped<ConfiguracoesViewModel>();
             services.AddScoped<VeterinarioViewModel>();
             Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride = "pt-BR";
 

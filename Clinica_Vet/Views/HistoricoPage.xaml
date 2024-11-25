@@ -24,7 +24,8 @@
             <!-- DataGrid de Produtos Removidos -->
             <toolkit:DataGrid x:Name="HistoricoDataGrid"
                               ItemsSource="{Binding ProdutosHistorico}"
-                              AutoGenerateColumns="False">
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True">
                 <toolkit:DataGrid.Columns>
                     <toolkit:DataGridTextColumn Header="ID" Binding="{Binding Id}" />
                     <toolkit:DataGridTextColumn Header="Nome" Binding="{Binding Nome}" />

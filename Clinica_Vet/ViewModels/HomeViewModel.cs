@@ -28,7 +28,7 @@ namespace Clinica_Vet.ViewModels
         }
 
 
-        private async Task CarregarConsultasAsync()
+        internal async Task CarregarConsultasAsync()
         {
             // Carrega todas as consultas do banco de dados
             var todasConsultas = await _consultaDao.ConsultarAsync();

@@ -18,6 +18,8 @@ namespace Clinica_Vet.Models
         
 
 
+
+
         public int Id { get; set; }
         public int ClienteId { get; set; }
         public Cliente Cliente { get; set; }
@@ -29,6 +31,15 @@ namespace Clinica_Vet.Models
                 return Consultas != null &&
                        Consultas.SelectMany(c => c.Exames ?? new System.Collections.Generic.List<Exame>())
                                 .Any(e => string.IsNullOrEmpty(e.Resultado));
+            }
+        }
+
+        public string TempoRestante
+        {
+            get
+            {
+                var tratamentoAtual = Tratamentos.FirstOrDefault(t => t.DataFim > DateTime.Now);
+                return tratamentoAtual != null ? tratamentoAtual.TempoRestante : "";
             }
         }
 
@@ -130,11 +141,22 @@ namespace Clinica_Vet.Models
                 }
             }
         }
+        public string NomeTratamentoAtual
+        {
+            get
+            {
+                var tratamentoAtual = Tratamentos.FirstOrDefault(t => t.DataFim >= DateTime.Now);
+                return tratamentoAtual != null ? $"Em tratamento: {tratamentoAtual.Descricao}" : "Sem tratamento ativo";
+            }
+        }
+
         public void AtualizarIndicadores()
         {
             // Notifica que os indicadores foram alterados
             OnPropertyChanged(nameof(IsEmTratamento));
             OnPropertyChanged(nameof(PossuiExamesPendentes));
+            OnPropertyChanged(nameof(NomeTratamentoAtual));
+            OnPropertyChanged(nameof(TempoRestante));
         }
         public ICollection<Consulta>? Consultas { get; set; } = new List<Consulta>();
 

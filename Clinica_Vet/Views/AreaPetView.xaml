@@ -12,6 +12,7 @@
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
         <converters:IdadeFormatConverter x:Key="IdadeFormatConverter" />
         <converters:PesoFormatConverter x:Key="PesoFormatConverter" />
+        
 
         <!-- Estilo para os cards -->
         <Style x:Key="AnimalCardStyle" TargetType="Border">
@@ -85,11 +86,14 @@
                                 <!-- Indicadores -->
                                 <StackPanel Orientation="Vertical" Spacing="4" Margin="0,8,0,0">
                                     <!-- Tratamento -->
-                                    <TextBlock Text="Em Tratamento"
+                                    <TextBlock Text="{Binding NomeTratamentoAtual}"
                                                Foreground="Red"
                                                FontWeight="SemiBold"
-                                               Visibility="{Binding IsEmTratamento, Converter={StaticResource BoolToVisibilityConverter}}"
                                                TextAlignment="Center"/>
+                                    <TextBlock Text="{Binding TempoRestante}"
+                                                 Foreground="Red"
+                                                FontWeight="SemiBold"
+                                                TextAlignment="Center"/>
 
                                     <!-- Exames Pendentes -->
                                     <TextBlock Text="Exames Pendentes"

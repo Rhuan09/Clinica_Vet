@@ -29,6 +29,16 @@ namespace Clinica_Vet.Views
         {
             this.InitializeComponent();
             DataContext = Ioc.Default.GetRequiredService<HomeViewModel>();
+            Loaded += OnPageLoaded;
+        }
+
+
+        private async void OnPageLoaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        {
+            if (DataContext is HomeViewModel viewModel)
+            {
+                await viewModel.CarregarConsultasAsync();
+            }
         }
 
         private void CalendarView_SelectedDatesChanged(CalendarView sender, CalendarViewSelectedDatesChangedEventArgs args)
